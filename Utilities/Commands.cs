@@ -7,13 +7,13 @@ using CounterStrikeSharp.API.Core;
 
 namespace Preach.CS2.Plugins.RollTheDice;
 
-internal class ChatCommands 
+internal class Commands 
 {
     private Dictionary<string, ArrayList>? _chatCommands;
     private string _chatCommandPrefix = "+";
     private RollTheDice _plugin;
 
-    public ChatCommands(RollTheDice plugin)
+    public Commands(RollTheDice plugin)
     {
         _plugin = plugin;
 

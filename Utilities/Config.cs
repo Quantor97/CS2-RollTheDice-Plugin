@@ -6,7 +6,7 @@ namespace Preach.CS2.Plugins.RollTheDice;
 
 internal class Config
 {
-	public static ConfigData configData = new();
+	public static ConfigData ConfigData = new();
 
 	public void CheckConfig(string moduleDirectory)
 	{
@@ -19,11 +19,11 @@ internal class Config
 		using (StreamReader sr = new StreamReader(fs))
 		{
 			// Deserialize the JSON from the file and load the configuration.
-			configData = JsonSerializer.Deserialize<ConfigData>(sr.ReadToEnd())!;
+			ConfigData = JsonSerializer.Deserialize<ConfigData>(sr.ReadToEnd())!;
 		}
 
-		if (configData != null && configData.ChatPrefix != null)
-			configData.ChatPrefix = ModifiedChatPrefix(configData.ChatPrefix);
+		if (ConfigData != null && ConfigData.ChatPrefix != null)
+			ConfigData.ChatPrefix = ModifiedChatPrefix(ConfigData.ChatPrefix);
 	}
 
 	private static void CreateAndWriteFile(string path)

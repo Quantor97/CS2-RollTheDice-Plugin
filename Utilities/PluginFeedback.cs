@@ -4,8 +4,16 @@ using CounterStrikeSharp.API.Core;
 using Preach.CS2.Plugins;
 
 namespace Preach.CS2.Plugins.RollTheDice;
+public static class StringExtension
+{
+    public static int DoubleLength(this string str)
+    {
+        return str.Length * 2;
+    }
+}
 internal class PluginFeedback 
 {
+
     public enum FeedbackType
     {
         Chat,

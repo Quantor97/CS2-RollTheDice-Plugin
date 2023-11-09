@@ -10,18 +10,18 @@ public class RollTheDice : BasePlugin
     public override string ModuleVersion => "0.5.0";
     public override string ModuleAuthor => "Preach";
 
-    private ChatCommands? _chatCommands;
+    private Commands? _commands;
     private DiceSystem? _diceSystem;
     private DiceEffects? _diceEffects;
     private Config? _config;
-    public static readonly bool DEBUG = false;
+    public static readonly bool DEBUG = true;
 
     public override void Load(bool hotReload)
     {
         _config = new Config();
         _config.CheckConfig(ModuleDirectory);
 
-        _chatCommands = new ChatCommands(this);
+        _commands = new Commands(this);
         _diceSystem = new DiceSystem(this);
         _diceEffects = new DiceEffects(this);
     }
@@ -36,9 +36,9 @@ public class RollTheDice : BasePlugin
         _diceSystem?.RollDice(plyController);
     }
 
-    public void ApplyDiceEffect(CCSPlayerController plyController, double effect)
+    public void ApplyRandomDiceEffect(CCSPlayerController plyController)
     {
-        _diceEffects?.ApplyEffect(plyController, effect);
+        _diceEffects?.RollAndApplyEffect(plyController);
     }
 
     #region Events

@@ -13,6 +13,7 @@ internal class DiceEffects
 {
     private ArrayList _diceEffects = null!;
     private RollTheDice _plugin;
+    private double _maxProbability = 0;
     public Dictionary<ulong, string>? PlyActiveEffects;
 
     public DiceEffects(RollTheDice plugin)
@@ -39,18 +40,14 @@ internal class DiceEffects
 
             data.Add(++counter);
 
-            if(comulativeProbability > 1)
-            {
-                PluginFeedback.Chat("Cumulative probability is greater than 1", PluginFeedback.FeedbackType.Error);
-                return;
-            }
-
             _diceEffects.Add(data);
         }
+
+        _maxProbability = comulativeProbability;
     }
 
 
-    private ArrayList? GetDiceEffect(double roll)
+    private ArrayList? GetDiceEffectByRoll(double roll)
     {
         if(_diceEffects == null)
         {
@@ -63,7 +60,7 @@ internal class DiceEffects
             double probability = (double)((ArrayList) effect)[0]!;
             string effectName = (string)((ArrayList) effect)[1]!;
 
-            PluginFeedback.Chat($"Effect: $(mark){effectName}$(default) | Probability: $(mark){probability}$(default) | Roll: $(mark){roll}", PluginFeedback.FeedbackType.Debug);
+            PluginFeedback.Chat($"Effect: {effectName} |Probability: {probability} | Roll: {roll}", PluginFeedback.FeedbackType.Debug);
 
             if(roll <= probability)
                 return (ArrayList)effect;
@@ -73,12 +70,13 @@ internal class DiceEffects
         return effectNothing;
     }
 
-    public void ApplyEffect(CCSPlayerController plyController, double roll)
+    public void RollAndApplyEffect(CCSPlayerController plyController)
     {
         if(plyController == null || !plyController.IsValid)
             return;
 
-        ArrayList effectData = GetDiceEffect(roll)!;
+        double roll = Random.Shared.NextDouble() * _maxProbability; 
+        ArrayList effectData = GetDiceEffectByRoll(roll)!;
 
         if(effectData == null)
             return;
@@ -93,7 +91,7 @@ internal class DiceEffects
         else
             PlyActiveEffects.Add(plyId, effectName);
 
-        PluginFeedback.Chat($"You rolled a $(mark){rollNum}$(default) and got $(mark){effectName}");
+        PluginFeedback.Chat($"You rolled a $(mark){rollNum}$(default) and got $(mark){effectName}", null, plyController);
         effectAction(plyController);
     }
 
@@ -103,14 +101,14 @@ internal class DiceEffects
 
         var effects = new ArrayList()
         {
-            new ArrayList { .1, "Low Gravity",  EffectLowGravity },
-            new ArrayList { .1, "High Gravity", EffectHighGravity },
-            new ArrayList { .1, "More Health",  EffectMoreHealth },
-            new ArrayList { .1, "Less Health",  EffectLessHealth },
-            new ArrayList { .1, "Increased Speed",  EffectIncreaseSpeed },
-            new ArrayList { .1, "Decreased Speed",  EffectDecreaseSpeed },
-            new ArrayList { .1, "Vampire",  EffectVampire },
-            new ArrayList { .3, "Invisible",  EffectInvisible },
+            new ArrayList { 1.0, "Low Gravity",  EffectLowGravity },
+            new ArrayList { 1.0, "High Gravity", EffectHighGravity },
+            new ArrayList { 1.0, "More Health",  EffectMoreHealth },
+            new ArrayList { 1.0, "Less Health",  EffectLessHealth },
+            new ArrayList { 1.0, "Increased Speed",  EffectIncreaseSpeed },
+            new ArrayList { 1.0, "Decreased Speed",  EffectDecreaseSpeed },
+            new ArrayList { 1.0, "Vampire",  EffectVampire },
+            new ArrayList { 5.0, "Invisible",  EffectInvisible },
         };
 
         MakeCumulativeProbabilities(ref effects);
@@ -181,7 +179,7 @@ internal class DiceEffects
 
         attackerController.PlayerPawn.Value.Health += (int) damageAmount;
 
-        PluginFeedback.Chat($"[$(mark)Vampire$(default)] You Stole $(mark){damageAmount}$(default) health from $(mark){victimName}");
+        PluginFeedback.Chat($"[$(mark)Vampire$(default)] You Stole $(mark){damageAmount}$(default) health from $(mark){victimName}", null, attackerController);
 
         return HookResult.Continue;
     }

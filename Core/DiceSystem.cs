@@ -64,8 +64,7 @@ internal class DiceSystem
             return;
 */
 
-        double diceRoll = Random.Shared.NextDouble();
-        _plugin.ApplyDiceEffect(plyController, diceRoll);
+        _plugin.ApplyRandomDiceEffect(plyController);
     }
 
     #region Hooks
