@@ -4,32 +4,12 @@ using CounterStrikeSharp.API.Core;
 using Preach.CS2.Plugins;
 
 namespace Preach.CS2.Plugins.RollTheDice;
-public static class StringExtension
-{
-    public static int DoubleLength(this string str)
-    {
-        return str.Length * 2;
-    }
-}
-internal class PluginFeedback 
-{
 
-    public enum FeedbackType
-    {
-        Chat,
-        Console,
-        Error,
-        Warning,
-        Debug
-    }
-
+internal static class PluginFeedback 
+{
     public static readonly string Prefix = "\x01[\x04RollTheDice\x01]";
 
-    private PluginFeedback()
-    {
-    }
-
-    public static string GetColor(FeedbackType type)
+    public static string GetTypeColor(FeedbackType type)
     {
         return type switch
         {
@@ -42,7 +22,7 @@ internal class PluginFeedback
     }
 
     // Currently not in use
-    private static string GetType(FeedbackType type) 
+    private static string GetFormatedType(FeedbackType type) 
     {
         var bracketStart = "\x07[";
         var brackerEnd = "\x07]";
@@ -57,68 +37,45 @@ internal class PluginFeedback
 
     private static string GetTypeWithPrefix(FeedbackType type)
     {
-        return Prefix + GetType(type);
+        return Prefix + GetFormatedType(type);
     }
 
-    private static string InterpretMessage(string message, FeedbackType feedbackType)
+    private static string InterpretColors(string message, FeedbackType feedbackType)
     {
-        var typeColor = GetColor(feedbackType);
+        var typeColor = GetTypeColor(feedbackType);
         return message.Replace("$(mark)", "\x0f").Replace("$(default)", typeColor);
     }
 
-    private static string GetOutput(bool forConsole, string message, FeedbackType? feedbackType)
+    private static string GetMessageOutput(bool forConsole, string message, FeedbackType? feedbackType)
     {
         var type = feedbackType ?? FeedbackType.Chat;
-        var typeColor = GetColor(type);
+        var typeColor = GetTypeColor(type);
         var typeWithPrefix = GetTypeWithPrefix(type);
-        message = InterpretMessage(message, type);
+        message = InterpretColors(message, type);
 
         return forConsole ? typeWithPrefix + " " + message : typeWithPrefix + typeColor + " " + message;
     }
 
-    public static void Chat(string message, FeedbackType? feedbackType, CCSPlayerController? ply)
+    public static void PrintChat(string message, FeedbackType? feedbackType = FeedbackType.Chat, CCSPlayerController? ply = null, bool withConsole = false)
     {
         if(feedbackType == FeedbackType.Debug && !RollTheDice.DEBUG)
             return;
 
-        string output = GetOutput(false, message, feedbackType);
+        string output = GetMessageOutput(false, message, feedbackType);
 
         if(ply != null)
+        {
             ply.PrintToChat(output);
+
+            if(withConsole)
+                ply.PrintToConsole(output);
+        }
         else
+        {
             Server.PrintToChatAll(output);
+
+            if(withConsole)
+                Server.PrintToConsole(output);
+        }
     }
-
-    public static void Chat(string message, FeedbackType? feedbackType)
-    {
-        Chat(message, feedbackType, null);
-    }
-
-    public static void Chat(string message)
-    {
-        Chat(message, null, null);
-    }
-
-    public static void ChatWithConsole(string message, FeedbackType? feedbackType, CCSPlayerController? ply)
-    {
-        string output = GetOutput(true, message, feedbackType);
-
-        if(ply != null)
-            ply.PrintToConsole(output);
-        else 
-            Server.PrintToConsole(output);
-        
-        Chat(message, feedbackType, ply);
-    }
-
-    public static void ChatWithConsole(string message, FeedbackType? feedbackType)
-    {
-        ChatWithConsole(message, feedbackType, null);
-    }
-
-    public static void ChatWithConsole(string message)
-    {
-        ChatWithConsole(message, null, null);
-    }
-
 }

@@ -1,4 +1,3 @@
-
 using System.Collections;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
@@ -18,7 +17,7 @@ internal class DiceSystem
 
     private void RemoveOrResetPlyDiceTimer(CCSPlayerController plyController, bool isRemove)
     {
-        if(plyController == null || !plyController.IsValid)
+        if(!plyController.IsValidPly())
             return;
 
         ulong plyId = _plugin.GetPlyId(plyController);
@@ -46,7 +45,7 @@ internal class DiceSystem
 
         if(plyHasRolled)
         {
-            PluginFeedback.Chat("You already rolled the dice for this round!",  PluginFeedback.FeedbackType.Warning, plyController);
+            plyController.CustomNotify("You already rolled the dice for this round!", FeedbackType.Warning);
             return false;
         }
 
@@ -56,13 +55,11 @@ internal class DiceSystem
 
     public void RollDice(CCSPlayerController plyController)
     {
-        if(plyController == null || !plyController.IsValid)
+        if(!plyController.IsValidPly())
             return;
 
-/*
         if(!CanRoll(plyController))
             return;
-*/
 
         _plugin.ApplyRandomDiceEffect(plyController);
     }
@@ -87,8 +84,7 @@ internal class DiceSystem
 
     public HookResult HandleRoundStart(EventRoundStart @event, GameEventInfo info)
     {
-        foreach(CCSPlayerController plyController in Utilities.GetPlayers())
-            RemoveOrResetPlyDiceTimer(plyController, false);
+        Utilities.GetPlayers().ForEach(plyController => RemoveOrResetPlyDiceTimer(plyController, false));
 
         return HookResult.Continue;
     }

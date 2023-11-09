@@ -1,12 +1,5 @@
-
-
-
 using System.Collections;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Modules.Memory;
 
 namespace Preach.CS2.Plugins.RollTheDice;
 internal class DiceEffects 
@@ -46,12 +39,30 @@ internal class DiceEffects
         _maxProbability = comulativeProbability;
     }
 
+    private void CreateDiceEffects()
+    {
+        _diceEffects = new ArrayList();
+
+        var effects = new ArrayList()
+        {
+            new ArrayList { 1.0, "Low Gravity",  EffectLowGravity },
+            new ArrayList { 1.0, "High Gravity", EffectHighGravity },
+            new ArrayList { 1.0, "More Health",  EffectMoreHealth },
+            new ArrayList { 1.0, "Less Health",  EffectLessHealth },
+            new ArrayList { 1.0, "Increased Speed",  EffectIncreaseSpeed },
+            new ArrayList { 1.0, "Decreased Speed",  EffectDecreaseSpeed },
+            new ArrayList { 1.0, "Vampire",  EffectVampire },
+            new ArrayList { 5.0, "Invisible",  EffectInvisible },
+        };
+
+        MakeCumulativeProbabilities(ref effects);
+    }
 
     private ArrayList? GetDiceEffectByRoll(double roll)
     {
         if(_diceEffects == null)
         {
-            PluginFeedback.Chat("Dice effects are null", PluginFeedback.FeedbackType.Error);
+            PluginFeedback.PrintChat("Dice effects are null", FeedbackType.Error);
             return null;
         }
 
@@ -60,7 +71,7 @@ internal class DiceEffects
             double probability = (double)((ArrayList) effect)[0]!;
             string effectName = (string)((ArrayList) effect)[1]!;
 
-            PluginFeedback.Chat($"Effect: {effectName} |Probability: {probability} | Roll: {roll}", PluginFeedback.FeedbackType.Debug);
+            PluginFeedback.PrintChat($"Effect: {effectName} |Probability: {probability} | Roll: {roll}", FeedbackType.Debug);
 
             if(roll <= probability)
                 return (ArrayList)effect;
@@ -91,27 +102,8 @@ internal class DiceEffects
         else
             PlyActiveEffects.Add(plyId, effectName);
 
-        PluginFeedback.Chat($"You rolled a $(mark){rollNum}$(default) and got $(mark){effectName}", null, plyController);
+        plyController.CustomNotify($"You rolled a $(mark){rollNum}$(default) and got $(mark){effectName}");
         effectAction(plyController);
-    }
-
-    private void CreateDiceEffects()
-    {
-        _diceEffects = new ArrayList();
-
-        var effects = new ArrayList()
-        {
-            new ArrayList { 1.0, "Low Gravity",  EffectLowGravity },
-            new ArrayList { 1.0, "High Gravity", EffectHighGravity },
-            new ArrayList { 1.0, "More Health",  EffectMoreHealth },
-            new ArrayList { 1.0, "Less Health",  EffectLessHealth },
-            new ArrayList { 1.0, "Increased Speed",  EffectIncreaseSpeed },
-            new ArrayList { 1.0, "Decreased Speed",  EffectDecreaseSpeed },
-            new ArrayList { 1.0, "Vampire",  EffectVampire },
-            new ArrayList { 5.0, "Invisible",  EffectInvisible },
-        };
-
-        MakeCumulativeProbabilities(ref effects);
     }
 
     private void RemoveOrResetPlyActiveEffects(CCSPlayerController plyController)
@@ -178,8 +170,7 @@ internal class DiceEffects
         damageAmount = victimHealth < 0 ? damageAmount+victimHealth : damageAmount;
 
         attackerController.PlayerPawn.Value.Health += (int) damageAmount;
-
-        PluginFeedback.Chat($"[$(mark)Vampire$(default)] You Stole $(mark){damageAmount}$(default) health from $(mark){victimName}", null, attackerController);
+        attackerController.CustomNotify($"You stole $(mark){damageAmount}$(default) health from $(mark){victimName}");
 
         return HookResult.Continue;
     }
