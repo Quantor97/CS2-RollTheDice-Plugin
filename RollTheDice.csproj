@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ClassName Condition=" '$(ClassName)' == '' ">RollTheDice</ClassName>
+    <DestinationFolder>M:\game\csgo\addons\counterstrikesharp\plugins\</DestinationFolder>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="CounterStrikeSharp.API">
+       <HintPath>..\CounterStrikeSharp.Api.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+    <Copy SourceFiles="./bin/Debug/net7.0/$(ClassName).dll" DestinationFolder="$(DestinationFolder)/$(ClassName)/" />
+  </Target>
+</Project>
