@@ -1,82 +1,172 @@
+using System.Collections;
 using System.Reflection;
 using System.Text.Json;
+using System.Threading.Tasks.Dataflow;
 using CounterStrikeSharp.API.Modules.Utils;
 
 namespace Preach.CS2.Plugins.RollTheDice;
 
-internal class Config
+public class Config
 {
 	public static ConfigData ConfigData = new();
+	public static string? ConfigPath;
 
-	public void CheckConfig(string moduleDirectory)
+	public Config(string moduleDirectory)
 	{
-		string path = Path.Join(moduleDirectory, "config.json");
+		ConfigPath = Path.Join(moduleDirectory, "config.json");
+	}
 
-		if (!File.Exists(path))
-			CreateAndWriteFile(path);
+	private void SubstituteConfigObjectsForEffects()
+	{
+		var effects = Effect.Effects;
 
-		using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
-		using (StreamReader sr = new StreamReader(fs))
+		if(effects == null)
+			return;
+
+		Effect.TotalCumulativeProbability = 0;
+
+		try 
 		{
-			// Deserialize the JSON from the file and load the configuration.
-			ConfigData = JsonSerializer.Deserialize<ConfigData>(sr.ReadToEnd())!;
+			foreach(Effect effect in effects)
+			{
+				var enabledProperty = Helpers.GetJsonElement(effect, "Enabled");
+				if(enabledProperty != null)
+					effect.Enabled = ((JsonElement)enabledProperty).GetBoolean();
+
+				var parameterProperty = Helpers.GetJsonElement(effect, "Parameter");
+				if(parameterProperty != null)
+					effect.Parameter = ((JsonElement)parameterProperty).GetDouble();
+
+				var probabilityProperty = Helpers.GetJsonElement(effect, "Probability");
+				if(probabilityProperty != null)
+					effect.Probability = ((JsonElement)probabilityProperty).GetDouble();
+
+				Effect.TotalCumulativeProbability += effect.Enabled ? effect.Probability : 0;
+				effect.CumulativeProbability = Effect.TotalCumulativeProbability;
+			} 
+
+		}
+		catch(Exception e)
+		{
+			PluginFeedback.WriteConsole(e.Message, FeedbackType.Error);
+			PluginFeedback.WriteConsole(e.StackTrace!, FeedbackType.Chat);
+		}
+	}
+
+	private void SubstituteConfigObjectsForGeneral()
+	{
+		var general = ConfigData.General;
+
+		try 
+		{
+			var language = Helpers.GetJsonElement("Language");
+			if(language != null)
+				general["Language"] = ((JsonElement)language).GetString()!;
+
+			var diceRollPerRound = Helpers.GetJsonElement("DiceRollPerRound");
+			if(diceRollPerRound != null)
+				general["DiceRollPerRound"] = ((JsonElement)diceRollPerRound).GetInt32();
+
+			var diceRollBroadcast = Helpers.GetJsonElement("DiceRollMessageBroadcast");
+			if(diceRollBroadcast != null)
+				general["DiceRollMessageBroadcast"] = ((JsonElement)diceRollBroadcast).GetBoolean();
+
+			var diceRollLocal = Helpers.GetJsonElement("DiceRollMessageLocal");
+			if(diceRollLocal != null)
+				general["DiceRollMessageLocal"] = ((JsonElement)diceRollLocal).GetBoolean();
+			
+		}
+		catch(Exception e)
+		{
+			PluginFeedback.WriteConsole(e.Message, FeedbackType.Error);
+			PluginFeedback.WriteConsole(e.StackTrace!, FeedbackType.Chat);
+		}
+	}
+
+	private void SubstituteConfigObjects()
+	{
+		SubstituteConfigObjectsForEffects();
+		SubstituteConfigObjectsForGeneral();
+
+		PluginFeedback.WriteConsole("Config loaded!", FeedbackType.Info);
+	}
+
+	public void LoadConfig()
+	{
+		PluginFeedback.WriteConsole("Loading config...", FeedbackType.Info);
+		bool fileExists = File.Exists(ConfigPath!);	
+		if(!fileExists)
+			CreateAndWriteFile(ConfigPath!);
+
+		if(fileExists)
+		{
+			using (FileStream fs = new FileStream(ConfigPath!, FileMode.Open, FileAccess.Read))
+			using (StreamReader sr = new StreamReader(fs))
+			{
+				ConfigData = JsonSerializer.Deserialize<ConfigData>(sr.ReadToEnd())!;
+			}
 		}
 
-		if (ConfigData != null && ConfigData.ChatPrefix != null)
-			ConfigData.ChatPrefix = ModifiedChatPrefix(ConfigData.ChatPrefix);
+		if(fileExists)
+			SubstituteConfigObjects();
 	}
 
 	private static void CreateAndWriteFile(string path)
 	{
+		PluginFeedback.WriteConsole("Creating config...", FeedbackType.Info);
 		using (FileStream fs = File.Create(path))
 		{
 			// File is created, and fs will automatically be disposed when the using block exits.
 		}
 
-		Console.WriteLine($"File created: {File.Exists(path)}");
+		GetDiceEffects();
+		GetDefaultGeneralConfig();
 
-		ConfigData config = new ConfigData
-		{
-			ChatPrefix = "{Green}[DamageInfo]",
-			CenterPrint = true,
-			RoundEndPrint = true,
-			FFAMode = false,
-		};
-
-		// Serialize the config object to JSON and write it to the file.
-		string jsonConfig = JsonSerializer.Serialize(config, new JsonSerializerOptions()
-		{
-			WriteIndented = true
-		});
-
+		string jsonConfig = JsonSerializer.Serialize(ConfigData, new JsonSerializerOptions { WriteIndented = true});
 		File.WriteAllText(path, jsonConfig);
 	}
 
-	// Essential method for replacing chat colors from the config file, the method can be used for other things as well.
-	private string ModifiedChatPrefix(string msg)
+	private static void GetDiceEffects()
 	{
-		if (msg.Contains("{"))
+		if(Effect.EffectCount == 0)
 		{
-			string modifiedValue = msg;
-			foreach (FieldInfo field in typeof(ChatColors).GetFields())
-			{
-				string pattern = $"{{{field.Name}}}";
-				if (msg.Contains(pattern, StringComparison.OrdinalIgnoreCase))
-				{
-					modifiedValue = modifiedValue.Replace(pattern, field.GetValue(null)!.ToString());
-				}
-			}
-			return modifiedValue;
+			PluginFeedback.WriteConsole("No effects found!", FeedbackType.Error);
+			return;
 		}
 
-		return string.IsNullOrEmpty(msg) ? "[DamageInfo]" : msg;
+		Dictionary<string, Dictionary<string, object>> configEffects = new();
+		Effect.Effects.ForEach(effect =>
+		{
+			Dictionary<string, object> effectData = new()
+			{
+				{ "Enabled", effect.Enabled },
+				{ "Parameter", effect.Parameter },
+				{ "Probability", effect.Probability }
+			};
+
+			configEffects.Add(effect.Name, effectData);
+		});
+
+		ConfigData.Effects = configEffects;
 	}
+
+	public static void GetDefaultGeneralConfig()
+	{
+		Dictionary<string, object> configGeneral = new() 
+		{
+			{ "Language", "en" },
+			{ "DiceRollPerRound", 1 },
+			{ "DiceRollMessageBroadcast", true },
+			{ "DiceRollMessageLocal", false },
+		};
+
+		ConfigData.General = configGeneral;
+	}
+
 }
 
-internal class ConfigData
+public class ConfigData
 {
-    public string? ChatPrefix { get; set; }
-    public bool CenterPrint { get; set; }
-    public bool RoundEndPrint { get; set; }
-    public bool FFAMode { get; set; }
+	public Dictionary<string, object> General { get; set; } = new();
+	public Dictionary<string, Dictionary<string, object>> Effects { get; set; } = new();
 }

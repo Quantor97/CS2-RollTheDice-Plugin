@@ -1,234 +1,144 @@
 using System.Collections;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
 
 namespace Preach.CS2.Plugins.RollTheDice;
-internal class DiceEffects 
+public class DiceEffects 
 {
-    private ArrayList _diceEffects = null!;
     private RollTheDice _plugin;
-    private double _maxProbability = 0;
-    public Dictionary<ulong, string>? PlyActiveEffects;
+    public Dictionary<ulong, Effect>? PlyActiveEffects = new();
 
-    public DiceEffects(RollTheDice plugin)
+    public DiceEffects()
     {
-        _plugin = plugin;
-        PlyActiveEffects = new Dictionary<ulong, string>();
+        _plugin = RollTheDice.Instance!;
 
         CreateDiceEffects();
     }
 
-    private void MakeCumulativeProbabilities(ref ArrayList effects)
+    public void CreateDiceEffects()
     {
-        int counter = 0;
-        double comulativeProbability = 0;
-        foreach(var effectData in effects)
-        {
-            double probability = (double)((ArrayList) effectData)[0]!;
-            comulativeProbability += probability;
+        Effect.Effects?.Clear();
+        Effect.EffectCount = 0;
+        Effect.TotalCumulativeProbability = 0;
+        // Schema:
+        // Without hook dependency: new Effect(probability, name, prettyName, effectAction);
+        // With hook depedency: new Effect(probability, name, prettyName, effectHookAction, effectHookName);
+        // Hooks added so far: PlayerHurt (EventPlayerHurt)
 
-            // Remove the probability from the array and add the comulative probability
-            ArrayList data = (ArrayList)effectData;
-            data.RemoveAt(0);
-            data.Insert(0, comulativeProbability);
-
-            data.Add(++counter);
-
-            _diceEffects.Add(data);
-        }
-
-        _maxProbability = comulativeProbability;
+        new Effect(1.0    ,"nothing"             ,"Nothing".__("effect_name_nothing")                   ,EffectNothing);
+        new Effect(1.0    ,"random_weapon"       ,"Random Weapon".__("effect_name_random_weapon")       ,EffectRandomWeapon);
+        new Effect(1.0    ,"low_gravity"         ,"Low Gravity".__("effect_name_low_gravity")           ,EffectLowGravity).SetFactor(0.5);
+        new Effect(1.0    ,"high_gravity"        ,"High Gravity".__("effect_name_high_gravity")         ,EffectHighGravity).SetFactor(1.5);
+        new Effect(1.0    ,"more_health"         ,"More Health".__("effect_name_more_health")           ,EffectMoreHealth).SetFactor(20);
+        new Effect(1.0    ,"less_health"         ,"Less Health".__("effect_name_less_health")           ,EffectLessHealth).SetFactor(20);
+        new Effect(1.0    ,"increased_speed"     ,"Increased Speed".__("effect_name_increased_speed")   ,EffectIncreaseSpeed);
+        new Effect(1.0    ,"decreased_speed"     ,"Decreased Speed".__("effect_name_decreased_speed")   ,EffectDecreaseSpeed);
+        new Effect(10.0   ,"vampire"             ,"Vampire".__("effect_name_vampire")                   ,EffectVampire, "PlayerHurt").SetFactor(0.5);
+        new Effect(1.0    ,"mirrored_vampire"    ,"Mirrored Vampire".__("effect_name_mirrored_vampire") ,EffectMirroredVampire, "PlayerHurt").SetFactor(0.5);
+        new Effect(1.0    ,"invisible"           ,"Invisible".__("effect_name_invisible")               ,EffectInvisible);
     }
 
-    private void CreateDiceEffects()
-    {
-        _diceEffects = new ArrayList();
+    #region Helpers
 
-        var effects = new ArrayList()
-        {
-            new ArrayList { 1.0, "Low Gravity",  EffectLowGravity },
-            new ArrayList { 1.0, "High Gravity", EffectHighGravity },
-            new ArrayList { 1.0, "More Health",  EffectMoreHealth },
-            new ArrayList { 1.0, "Less Health",  EffectLessHealth },
-            new ArrayList { 1.0, "Increased Speed",  EffectIncreaseSpeed },
-            new ArrayList { 1.0, "Decreased Speed",  EffectDecreaseSpeed },
-            new ArrayList { 1.0, "Vampire",  EffectVampire },
-            new ArrayList { 5.0, "Invisible",  EffectInvisible },
-        };
-
-        MakeCumulativeProbabilities(ref effects);
-    }
-
-    private ArrayList? GetDiceEffectByRoll(double roll)
-    {
-        if(_diceEffects == null)
-        {
-            PluginFeedback.PrintBroadcast("Dice effects are null (Contact Server Owner)", FeedbackType.Error);
-            return null;
-        }
-
-        foreach(var effect in _diceEffects!)
-        {
-            double probability = (double)((ArrayList) effect)[0]!;
-            string effectName = (string)((ArrayList) effect)[1]!;
-
-            if(roll <= probability)
-                return (ArrayList)effect;
-        }
-
-        ArrayList effectNothing = new ArrayList { -1, "Nothing", EffectNothing, _diceEffects.Count+1 };
-        return effectNothing;
-    }
-
-    public void RollAndApplyEffect(CCSPlayerController plyController)
-    {
-        if(plyController == null || !plyController.IsValid)
-            return;
-
-        double roll = Random.Shared.NextDouble() * _maxProbability; 
-        ArrayList effectData = GetDiceEffectByRoll(roll)!;
-
-        if(effectData == null)
-            return;
-
-        string effectName = (string)effectData[1]!;
-        Action<CCSPlayerController> effectAction = (Action<CCSPlayerController>)effectData[2]!;
-        int rollNum = (int)effectData[3]!;
-
-        ulong plyId = _plugin.GetPlyId(plyController);
-        if(PlyActiveEffects!.ContainsKey(plyId))
-            PlyActiveEffects[plyId] = effectName;
-        else
-            PlyActiveEffects.Add(plyId, effectName);
-
-        plyController.CustomPrint($"You rolled a $(mark){rollNum}$(default) and got $(mark){effectName}");
-        effectAction(plyController);
-    }
-
-    private void RemoveOrResetPlyActiveEffects(CCSPlayerController plyController)
-    {
-        if(plyController == null || !plyController.IsValid)
-            return;
-
-        ulong plyId = _plugin.GetPlyId(plyController);
-
-        if(!PlyActiveEffects!.ContainsKey(plyId))
-            return;
-
-        PlyActiveEffects.Remove(plyId);
-    }
-
-    #region Hooks
-
-    public HookResult HandleRoundStart(EventRoundStart @event, GameEventInfo info)
-    {
-        PlyActiveEffects!.Clear();
-
-        return HookResult.Continue;
-    }
-
-    public HookResult HandlePlayerDeath(EventPlayerDeath @event, GameEventInfo info)
-    {
-        CCSPlayerController plyController = @event.Userid;
-        RemoveOrResetPlyActiveEffects(plyController);
-
-        return HookResult.Continue;
-    }
-
-    public HookResult HandlePlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
-    {
-        CCSPlayerController plyController = @event.Userid;
-        RemoveOrResetPlyActiveEffects(plyController);
-
-        return HookResult.Continue;
-    }
-
-    public HookResult HandlePlayerHurtVampire(EventPlayerHurt @event, GameEventInfo info)
+    private int GetDamageInRangePlyHealth(Effect effect, EventPlayerHurt @event)
     {
         CCSPlayerController attackerController = @event.Attacker;
         CCSPlayerController victimController = @event.Userid;
 
-        if(attackerController == victimController)
-            return HookResult.Continue;
-
-        if(PlyActiveEffects == null)
-            return HookResult.Continue;
-
-        ulong attackerId = _plugin.GetPlyId(attackerController);
-
-        if(!PlyActiveEffects.ContainsKey(attackerId) || PlyActiveEffects[attackerId] != "Vampire") 
-            return HookResult.Continue;
-
-        if(attackerController == null || !attackerController.IsValid)
-            return HookResult.Continue;
-
-        string victimName = victimController.PlayerPawn.Value.DesignerName;
-
+        // Count damage that is lower than or equal the victim's health
         float damageAmount = @event.DmgHealth; 
         int victimHealth = victimController.PlayerPawn.Value.Health;
         damageAmount = victimHealth < 0 ? damageAmount+victimHealth : damageAmount;
 
-        attackerController.PlayerPawn.Value.Health += (int) damageAmount;
-        attackerController.CustomPrint($"You stole $(mark){damageAmount}$(default) health from $(mark){victimName}");
-
-        return HookResult.Continue;
+        return (int) (damageAmount * effect.Parameter);
     }
 
     #endregion
 
     #region Effects
 
-    private void EffectNothing(CCSPlayerController plyController)
+    private void EffectNothing(Effect effect, CCSPlayerController plyController)
+    {
+    }
+
+    private void EffectLowGravity(Effect effect, CCSPlayerController plyController)
+    {
+        plyController.PlayerPawn.Value.GravityScale = (float)effect.Parameter;
+    }
+
+
+    private void EffectHighGravity(Effect effect, CCSPlayerController plyController)
+    {
+        plyController.PlayerPawn.Value.GravityScale = (float)effect.Parameter;
+    }
+
+    private void EffectMoreHealth(Effect effect, CCSPlayerController plyController)
+    {
+        plyController.PlayerPawn.Value.Health += (int)effect.Parameter;
+    }
+
+    private void EffectLessHealth(Effect effect, CCSPlayerController plyController)
+    {
+        plyController.PlayerPawn.Value.Health -= (int)effect.Parameter;
+    }
+
+    private void EffectRandomWeapon(Effect effect, CCSPlayerController plyController)
+    {
+        // Todo
+    }
+    private void EffectInvisible(Effect effect, CCSPlayerController plyController)
     {
         // Todo
     }
 
-    private void EffectLowGravity(CCSPlayerController plyController)
-    {
-        plyController.PlayerPawn.Value.GravityScale = .5f;
-    }
-
-    private void EffectInvisible(CCSPlayerController plyController)
-    {
-        // Todo
-        plyController.PlayerPawn.Value.RenderMode = RenderMode_t.kRenderNone;
-    }
-
-    private void EffectHighGravity(CCSPlayerController plyController)
-    {
-        plyController.PlayerPawn.Value.GravityScale = 1.5f;
-    }
-
-    private void EffectMoreHealth(CCSPlayerController plyController)
-    {
-        int healthAdd = 20;
-
-        plyController.PlayerPawn.Value.Health += healthAdd;
-    }
-
-    private void EffectLessHealth(CCSPlayerController plyController)
-    {
-        int healthAdd = 20;
-
-        plyController.PlayerPawn.Value.Health -= healthAdd;
-    }
-
-    private void EffectRandomWeapon(CCSPlayerController plyController)
-    {
-
-    }
-
-    private void EffectIncreaseSpeed(CCSPlayerController plyController) 
+    private void EffectIncreaseSpeed(Effect effect, CCSPlayerController plyController) 
     {
         plyController.PlayerPawn.Value.Speed *= 3f;
     }
 
-    private void EffectDecreaseSpeed(CCSPlayerController plyController) 
+    private void EffectDecreaseSpeed(Effect effect, CCSPlayerController plyController) 
     {
         plyController.PlayerPawn.Value.Speed *= .5f;
     }
 
-    private void EffectVampire(CCSPlayerController playerController) 
+    private void EffectVampire(Effect effect, GameEvent @gameEvent, GameEventInfo info) 
     {
+        if(@gameEvent is not EventPlayerHurt @event)
+            return;
+
+        CCSPlayerController attackerController = @event.Attacker;
+        CCSPlayerController victimController = @event.Userid;
+
+        if(attackerController == victimController)
+            return;
+
+        int damageAmount = GetDamageInRangePlyHealth(effect, @event);
+        string victimName = victimController.PlayerName;
+
+        attackerController.PlayerPawn.Value.Health += (int) damageAmount;
+        attackerController.CustomPrint($"[$(mark2){effect.PrettyName}$(default)] You stole $(mark){damageAmount}$(default) health from $(mark){victimName}"
+                .__("vampire_effect", effect.Name, damageAmount+"", victimName));
+    }
+
+    private void EffectMirroredVampire(Effect effect, GameEvent @gameEvent, GameEventInfo info) 
+    {
+        if(@gameEvent is not EventPlayerHurt @event)
+            return;
+
+        CCSPlayerController attackerController = @event.Attacker;
+        CCSPlayerController victimController = @event.Userid;
+
+        if(attackerController == victimController)
+            return;
+
+        int damageAmount = GetDamageInRangePlyHealth(effect, @event);
+        string victimName = victimController.PlayerName;
+        int attackerHealth = attackerController.PlayerPawn.Value.Health;
+
+        // Health less than 1 crashes the server
+        attackerController.PlayerPawn.Value.Health = Math.Max( attackerHealth - damageAmount, 1);
+        attackerController.CustomPrint($"[$(mark2){effect.PrettyName}$(default)] {victimName} stole $(mark){damageAmount}$(default) health from $(mark)You"
+                .__("mirrored_vampire_effect", effect.Name, victimName, damageAmount+""));
     }
 
     #endregion

@@ -10,9 +10,9 @@ internal class Commands
 {
     private RollTheDice _plugin;
 
-    public Commands(RollTheDice plugin)
+    public Commands()
     {
-        _plugin = plugin;
+        _plugin = RollTheDice.Instance!;
 
         AddCommands();
     }
@@ -20,7 +20,7 @@ internal class Commands
     private void AddCommands()
     {
         // Roll the dice
-        _plugin.AddCommand("rtd", "Roll the dice!", (ply, info) => {
+        _plugin.AddCommand("rtd", "Roll the dice!".__("cmd_description_rtd"), (ply, info) => {
             if(!ply.IsValidPly())
                 return;
 
@@ -28,7 +28,7 @@ internal class Commands
         });
 
         // Roll the dice alias
-        _plugin.AddCommand("r", "Roll the dice!", (ply, info) => {
+        _plugin.AddCommand("r", "Roll the dice!".__("cmd_description_rtd_alias1"), (ply, info) => {
             if(!ply.IsValidPly())
                 return;
 
@@ -36,11 +36,15 @@ internal class Commands
         });
 
         // Roll the dice alias
-        _plugin.AddCommand("rollthedice", "Roll the dice!", (ply, info) => {
+        _plugin.AddCommand("rollthedice", "Roll the dice!".__("cmd_description_rtd_alias2"), (ply, info) => {
             if(!ply.IsValidPly())
                 return;
 
             _plugin.PlyRollTheDice(ply!);
+        });
+
+        _plugin.AddCommand("reloadconfig", "Reload the config file!".__("cmd_description_reload_config"), (ply, info) => {
+            _plugin.ReloadConfig();
         });
     }
 }

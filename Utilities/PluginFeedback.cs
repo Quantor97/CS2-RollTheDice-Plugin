@@ -17,7 +17,8 @@ internal static class PluginFeedback
             FeedbackType.Error => "\x07",
             FeedbackType.Warning => "\x09",
             FeedbackType.Debug => "\x09",
-            _ => "\x07"
+            FeedbackType.Info => "\x09",
+            _ => "\x01"
         };
     }
 
@@ -31,29 +32,63 @@ internal static class PluginFeedback
         {
             FeedbackType.Error => bracketStart + "\x02 Error " + brackerEnd,
             FeedbackType.Debug => bracketStart + "\x10 Debug " + brackerEnd,
+            // FeedbackType.Info => bracketStart + "\x04 Info " + brackerEnd,
+            FeedbackType.Info => bracketStart + "\x10 Info " + brackerEnd,
             _ => ""
         };
     }
 
+    private static void SetConsoleColors(FeedbackType? feedbackType)
+    {
+        var type = feedbackType ?? FeedbackType.Chat;
+
+        switch(type)
+        {
+            case FeedbackType.Error:
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.BackgroundColor = ConsoleColor.DarkRed;
+                break;
+            case FeedbackType.Warning:
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.BackgroundColor = ConsoleColor.DarkYellow;
+                break;
+            case FeedbackType.Debug:
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.BackgroundColor = ConsoleColor.DarkCyan;
+                break;
+            case FeedbackType.Info:
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.BackgroundColor = ConsoleColor.DarkGreen;
+                break;
+            default:
+                Console.ForegroundColor = ConsoleColor.White;
+                break;
+        }
+    }
+
     private static string GetTypeWithPrefix(FeedbackType type)
     {
-        return Prefix + GetFormatedType(type);
+        return Prefix + GetFormatedType(type) + " ";
     }
 
     private static string InterpretColors(string message, FeedbackType feedbackType)
     {
         var typeColor = GetTypeColor(feedbackType);
-        return message.Replace("$(mark)", "\x0f").Replace("$(default)", typeColor);
+        return message.Replace("$(mark)", "\x0f").Replace("$(default)", typeColor).Replace("$(mark2)", "\x10");
     }
 
-    private static string GetMessageOutput(bool forConsole, string message, FeedbackType? feedbackType)
+    private static string GetMessageOutput(bool forConsole, string message, FeedbackType? feedbackType, bool console = false)
     {
         var type = feedbackType ?? FeedbackType.Chat;
-        var typeColor = GetTypeColor(type);
         var typeWithPrefix = GetTypeWithPrefix(type);
+
+        if(console)
+            return typeWithPrefix + message;
+
+        var typeColor = GetTypeColor(type);
         message = InterpretColors(message, type);
 
-        return forConsole ? typeWithPrefix + " " + message : typeWithPrefix + typeColor + " " + message;
+        return typeWithPrefix + typeColor + message;
     }
 
     public static void PrintChat(CCSPlayerController ply, string message, FeedbackType? feedbackType = FeedbackType.Chat, bool withConsole = false)
@@ -77,5 +112,16 @@ internal static class PluginFeedback
 
         if(withConsole)
             Server.PrintToConsole(output);
+    }
+
+    public static void WriteConsole(string message, FeedbackType? feedbackType = FeedbackType.Chat)
+    {
+        string output = GetMessageOutput(true, message, feedbackType);
+
+
+
+        SetConsoleColors(feedbackType);
+        Console.WriteLine(output);
+        Console.ResetColor();
     }
 }

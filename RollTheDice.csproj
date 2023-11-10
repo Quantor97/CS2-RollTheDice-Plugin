@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <ClassName Condition=" '$(ClassName)' == '' ">RollTheDice</ClassName>
-    <DestinationFolder>M:\game\csgo\addons\counterstrikesharp\plugins\</DestinationFolder>
+    <DestinationFolder>Z:\game\csgo\addons\counterstrikesharp\plugins\</DestinationFolder>
   </PropertyGroup>
 
   <ItemGroup>

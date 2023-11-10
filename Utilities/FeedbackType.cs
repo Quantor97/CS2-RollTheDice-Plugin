@@ -3,7 +3,7 @@ namespace Preach.CS2.Plugins.RollTheDice;
 public enum FeedbackType
 {
     Chat,
-    Console,
+    Info,
     Error,
     Warning,
     Debug

@@ -69,7 +69,7 @@ internal class ChatCommands
 
         if(args.Length != argsCount)
         {
-            plyController.CustomPrint($"Usage : $(mark){_chatCommandPrefix + command} {usage}");
+            plyController.CustomPrint($"Usage : <mark>{_chatCommandPrefix + command} {usage}");
             return HookResult.Continue;
         }
 
