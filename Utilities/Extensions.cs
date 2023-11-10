@@ -7,12 +7,12 @@ using Preach.CS2.Plugins;
 namespace Preach.CS2.Plugins.RollTheDice;
 public static class CCSPlayerExtensions
 {
-    public static void CustomNotify(this CCSPlayerController? plyController, string message, FeedbackType? feedbackType = FeedbackType.Chat)
+    public static void CustomPrint(this CCSPlayerController plyController, string message, FeedbackType? feedbackType = FeedbackType.Chat)
     {
         if(!plyController.IsValidPly())
             return;
 
-        PluginFeedback.PrintChat(message, feedbackType, plyController);
+        PluginFeedback.PrintChat(plyController, message, feedbackType);
     }
 
     public static bool IsValidPly(this CCSPlayerController? plyController)

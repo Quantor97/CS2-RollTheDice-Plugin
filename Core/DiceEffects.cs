@@ -62,7 +62,7 @@ internal class DiceEffects
     {
         if(_diceEffects == null)
         {
-            PluginFeedback.PrintChat("Dice effects are null", FeedbackType.Error);
+            PluginFeedback.PrintBroadcast("Dice effects are null (Contact Server Owner)", FeedbackType.Error);
             return null;
         }
 
@@ -70,8 +70,6 @@ internal class DiceEffects
         {
             double probability = (double)((ArrayList) effect)[0]!;
             string effectName = (string)((ArrayList) effect)[1]!;
-
-            PluginFeedback.PrintChat($"Effect: {effectName} |Probability: {probability} | Roll: {roll}", FeedbackType.Debug);
 
             if(roll <= probability)
                 return (ArrayList)effect;
@@ -102,7 +100,7 @@ internal class DiceEffects
         else
             PlyActiveEffects.Add(plyId, effectName);
 
-        plyController.CustomNotify($"You rolled a $(mark){rollNum}$(default) and got $(mark){effectName}");
+        plyController.CustomPrint($"You rolled a $(mark){rollNum}$(default) and got $(mark){effectName}");
         effectAction(plyController);
     }
 
@@ -170,7 +168,7 @@ internal class DiceEffects
         damageAmount = victimHealth < 0 ? damageAmount+victimHealth : damageAmount;
 
         attackerController.PlayerPawn.Value.Health += (int) damageAmount;
-        attackerController.CustomNotify($"You stole $(mark){damageAmount}$(default) health from $(mark){victimName}");
+        attackerController.CustomPrint($"You stole $(mark){damageAmount}$(default) health from $(mark){victimName}");
 
         return HookResult.Continue;
     }

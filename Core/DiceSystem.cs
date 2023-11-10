@@ -45,7 +45,7 @@ internal class DiceSystem
 
         if(plyHasRolled)
         {
-            plyController.CustomNotify("You already rolled the dice for this round!", FeedbackType.Warning);
+            plyController.CustomPrint("You already rolled the dice for this round!", FeedbackType.Warning);
             return false;
         }
 

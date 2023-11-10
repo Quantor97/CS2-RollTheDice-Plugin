@@ -56,26 +56,26 @@ internal static class PluginFeedback
         return forConsole ? typeWithPrefix + " " + message : typeWithPrefix + typeColor + " " + message;
     }
 
-    public static void PrintChat(string message, FeedbackType? feedbackType = FeedbackType.Chat, CCSPlayerController? ply = null, bool withConsole = false)
+    public static void PrintChat(CCSPlayerController ply, string message, FeedbackType? feedbackType = FeedbackType.Chat, bool withConsole = false)
     {
-        if(feedbackType == FeedbackType.Debug && !RollTheDice.DEBUG)
+        if(!ply.IsValidPly() || feedbackType == FeedbackType.Debug && !RollTheDice.DEBUG)
             return;
 
         string output = GetMessageOutput(false, message, feedbackType);
 
-        if(ply != null)
-        {
-            ply.PrintToChat(output);
+        ply.PrintToChat(output);
 
-            if(withConsole)
-                ply.PrintToConsole(output);
-        }
-        else
-        {
-            Server.PrintToChatAll(output);
+        if(withConsole)
+            ply.PrintToConsole(output);
+    }
 
-            if(withConsole)
-                Server.PrintToConsole(output);
-        }
+    public static void PrintBroadcast(string message, FeedbackType? feedbackType = FeedbackType.Chat, bool withConsole = false)
+    {
+        string output = GetMessageOutput(false, message, feedbackType);
+
+        Server.PrintToChatAll(output);
+
+        if(withConsole)
+            Server.PrintToConsole(output);
     }
 }
