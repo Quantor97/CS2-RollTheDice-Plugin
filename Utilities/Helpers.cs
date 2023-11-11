@@ -37,4 +37,16 @@ internal static class Helpers
         return valueElement;
     }
 
+    public static bool IntepretStringArguments(string rawText, string[] args, out string result)
+    {
+        result = rawText;
+        if(args == null || args.Length == 0)
+            return false;
+
+        for(int i = 0; i < args.Length; i++)
+            result = rawText.Replace("{"+i+"}", args[i]);
+        
+        return true;
+    }
+
 }

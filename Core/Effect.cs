@@ -25,9 +25,12 @@ public class Effect
 
     // PrettyName is used to display the effect name to the player
     public string PrettyName { get; set; } = "";
+    
+    // Description is used to display the effect description to the player
+    public string Description { get; set; } = "";
 
-    // Factor is used to determine the effect factor
-    public double Parameter { get; set; } = -1;
+    // Parameters are used to store the parameters of the effect
+    public Dictionary<string, string> Parameters { get; set; } = new();
 
     // Roll number is used to determine the order of effects
     public int RollNumber { get; set; }
@@ -75,8 +78,15 @@ public class Effect
         EffectHookAction = effectHookAction;
     }
 
-    public void SetFactor(double factor)
+    public Effect SetParameters(Dictionary<string, string> parameters)
     {
-        Parameter = factor;
+        Parameters = parameters;
+        return this;
+    }
+
+    public Effect SetDescription(string description)
+    {
+        Description = $"[$(mark){PrettyName}$(default)] " + description;
+        return this;
     }
 }

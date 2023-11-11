@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Text.Json;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 
@@ -6,14 +7,14 @@ namespace Preach.CS2.Plugins.RollTheDice;
 public class DiceSystem 
 {
     private RollTheDice _plugin;
-    private Dictionary<ulong, int>? _plyDiceUseCounter;
+    private Dictionary<ulong, int>? _plyRollCounter;
     private Dictionary<ulong, Effect>? _plysActiveEffect = new();
 
     public DiceSystem()
     {
         _plugin = RollTheDice.Instance!;
         
-        _plyDiceUseCounter = new Dictionary<ulong, int>();
+        _plyRollCounter = new Dictionary<ulong, int>();
 
         _plugin.RegisterEventHandler<EventPlayerDisconnect>(HandlePlayerDisconnect);
         _plugin.RegisterEventHandler<EventPlayerDeath>(HandlePlayerDeath);
@@ -23,10 +24,10 @@ public class DiceSystem
 
     public void ResetState()
     {
-        if(_plyDiceUseCounter != null)
-            _plyDiceUseCounter.Clear();
+        if(_plyRollCounter != null)
+            _plyRollCounter.Clear();
         else
-            _plyDiceUseCounter = new Dictionary<ulong, int>();
+            _plyRollCounter = new Dictionary<ulong, int>();
 
         if(_plysActiveEffect != null)
             _plysActiveEffect.Clear();
@@ -34,47 +35,67 @@ public class DiceSystem
             _plysActiveEffect = new Dictionary<ulong, Effect>();
     }
 
-    private int GetConfigRollPerRound()
+    private int GetConfigValueInt(string key)
     {
-        return (int) Config.ConfigData.General["DiceRollPerRound"];
+        try {
+            if(Config.ConfigData.General.TryGetValue(key, out var output))
+            {
+                return (int)output;
+            }
+        }
+        catch(Exception e)
+        {
+            PluginFeedback.WriteConsole($"Error while getting config value for {key} (Contact Server Owner)", FeedbackType.Error);
+            PluginFeedback.WriteConsole(e.Message, FeedbackType.Error);
+            PluginFeedback.WriteConsole(e.StackTrace!, FeedbackType.Error);
+        }
+        
+        return 0;
     }
 
-    private bool GetConfigDiceRollMessageBroadcast()
+    private bool GetConfigValueBool(string key)
     {
-        return (bool) Config.ConfigData.General["DiceRollMessageBroadcast"];
+        try {
+            if(Config.ConfigData.General.TryGetValue(key, out var output))
+            {
+                JsonElement value = (JsonElement)output;
+                return value.GetBoolean();
+            }
+        }
+        catch(Exception e)
+        {
+            PluginFeedback.WriteConsole($"Error while getting config value for {key} (Contact Server Owner)", FeedbackType.Error);
+            PluginFeedback.WriteConsole(e.Message, FeedbackType.Error);
+            PluginFeedback.WriteConsole(e.StackTrace!, FeedbackType.Error);
+        }
+        
+        return false;
     }
 
-    private bool GetConfigDiceRollMessageLocal()
-    {
-        return (bool) Config.ConfigData.General["DiceRollMessageLocal"];
-    }
-
-    private void RemoveOrResetPlyDiceTimer(CCSPlayerController plyController, bool isRemove)
+    private void RemoveOrResetPlyDiceCounter(CCSPlayerController plyController, bool isRemove)
     {
         if(!plyController.IsValidPly())
             return;
 
         ulong plyId = plyController.GetPlyId();
 
-        if(!_plyDiceUseCounter!.ContainsKey(plyId))
+        if(!_plyRollCounter!.ContainsKey(plyId))
             return;
 
         if(isRemove)
-            _plyDiceUseCounter.Remove(plyId);
+            _plyRollCounter.Remove(plyId);
         else 
-            _plyDiceUseCounter[plyId] = GetConfigRollPerRound();
+            _plyRollCounter[plyId] = GetConfigValueInt("DiceRollPerRound");
     }
 
     public bool CanRoll(CCSPlayerController plyController)
     {
         ulong plyId = plyController.GetPlyId();
 
-        if(!_plyDiceUseCounter!.ContainsKey(plyId))
-        {
-            _plyDiceUseCounter.Add(plyId, GetConfigRollPerRound());
-        }
+        if(!_plyRollCounter!.ContainsKey(plyId))
+            _plyRollCounter.Add(plyId, GetConfigValueInt("DiceRollPerRound"));
 
-        int plyRollAmountLeft = --_plyDiceUseCounter[plyId];
+        int plyRollAmountLeft = --_plyRollCounter[plyId];
 
         if(plyRollAmountLeft < 0)
         {
@@ -91,25 +112,64 @@ public class DiceSystem
         return true;
     }
 
+    private bool CheckTeamAndLifeState(CCSPlayerController plyController)
+    {
+
+        if(plyController.PlayerPawn.Value.LifeState != 0)
+        {
+            plyController.CustomPrint("You can not roll the dice while dead!"
+                    .__("dice_cant_roll_dead"), FeedbackType.Warning);
+
+            return false;
+        }
+
+        bool canCTRoll = GetConfigValueBool("CTsCanRoll");
+        bool canTRoll = GetConfigValueBool("TsCanRoll");
+
+        var teamName = "";
+        switch(plyController.TeamNum)
+        {
+            case 2: 
+                    teamName = "Terrorist";
+                break;
+            case 3: 
+                    teamName = "Counter Terrorist";
+                break;
+            default:
+                    teamName = "Unknown";
+                break;
+        }
+
+        if(!canTRoll && plyController.TeamNum == 2 || !canCTRoll && plyController.TeamNum == 3)
+        {
+            plyController.CustomPrint($"You can not roll as a $(mark){teamName}"
+                .__("dice_wrong_team", teamName), FeedbackType.Warning);
+
+            return false;
+        }
+
+        return true;
+    }
+
     public void RollDice(CCSPlayerController plyController)
     {
-        if(!plyController.IsValidPly())
-            return;
-
-        if(!CanRoll(plyController))
+        if(!plyController.IsValidPly() || !CheckTeamAndLifeState(plyController) || !CanRoll(plyController))
             return;
 
         RollAndApplyEffect(plyController);
     }
 
-    private Effect? GetEffectByRoll(double roll)
+    private Effect? GetEffectByRoll()
     {
         var effectsList = Effect.Effects;
+
         if(effectsList == null)
         {
-            PluginFeedback.PrintBroadcast("Dice effects are null (Contact Server Owner)", FeedbackType.Error);
+            PluginFeedback.PrintBroadcast("Dice effects are null", FeedbackType.Error);
             return null;
         }
+
+        double roll = Random.Shared.NextDouble() * Effect.TotalCumulativeProbability;
 
         return effectsList
                 .Where(e => e.Enabled)
@@ -122,8 +182,7 @@ public class DiceSystem
         if(!plyController.IsValidPly())
             return;
 
-        double roll = Random.Shared.NextDouble() * Effect.TotalCumulativeProbability;; 
-        Effect? effect = GetEffectByRoll(roll)!;
+        Effect? effect = GetEffectByRoll()!;
 
         if(effect == null)
             return;
@@ -136,21 +195,26 @@ public class DiceSystem
             _plysActiveEffect.Add(plyId, effect);
 
 
-        if(GetConfigDiceRollMessageLocal())
+        bool localMessage = GetConfigValueBool("DiceRollMessageLocal");
+        bool broadcastMessage = GetConfigValueBool("DiceRollMessageBroadcast");
+
+        if(localMessage)
         {
             plyController.CustomPrint($"You rolled a $(mark){effect.RollNumber}$(default) and got $(mark){effect.PrettyName}"
-                    .__("dice_rolled_local", effect.RollNumber+"", effect.Name));
+                    .__("dice_rolled_local", effect.RollNumber+"", effect.PrettyName));
         }
 
-        if(GetConfigDiceRollMessageBroadcast())
+        if(broadcastMessage)
         {
             PluginFeedback.PrintBroadcast($"$(mark){plyController.PlayerName}$(default) rolled a $(mark){effect.RollNumber}$(default) and got $(mark){effect.PrettyName}"
-                    .__("dice_rolled_broadcast", plyController.PlayerName, effect.RollNumber+"", effect.Name));
+                    .__("dice_rolled_broadcast", plyController.PlayerName, effect.RollNumber+"", effect.PrettyName));
         }
 
         var effectAction = effect.EffectAction;
         if(effectAction != null)
             effectAction(effect, plyController);
+        else 
+            plyController.CustomPrint(effect.Description, FeedbackType.Chat);
     }
 
     private void RemoveOrResetPlyActiveEffects(CCSPlayerController plyController)
@@ -171,7 +235,7 @@ public class DiceSystem
     public HookResult HandlePlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
     {
         CCSPlayerController plyController = @event.Userid;
-        RemoveOrResetPlyDiceTimer(plyController, true);
+        RemoveOrResetPlyDiceCounter(plyController, true);
         RemoveOrResetPlyActiveEffects(plyController);
 
         return HookResult.Continue;
@@ -179,8 +243,11 @@ public class DiceSystem
 
     public HookResult HandlePlayerDeath(EventPlayerDeath @event, GameEventInfo info)
     {
+        if(!GetConfigValueBool("ResetPlayerRollOnDeath"))
+            return HookResult.Continue;
+
         CCSPlayerController plyController = @event.Userid;
-        RemoveOrResetPlyDiceTimer(plyController, false);
+        RemoveOrResetPlyDiceCounter(plyController, false);
         RemoveOrResetPlyActiveEffects(plyController);
 
         return HookResult.Continue;
@@ -188,11 +255,19 @@ public class DiceSystem
 
     public HookResult HandleRoundStart(EventRoundStart @event, GameEventInfo info)
     {
+        if(GetConfigValueBool("NotifyAtRoundStart"))
+            PluginFeedback.PrintBroadcast("Enter $(mark)!rtd$(default) in chat to roll the dice!".__("dice_notify_round_start"), FeedbackType.Chat);
+
+        if(!GetConfigValueBool("ResetRollsOnRoundStart"))
+            return HookResult.Continue;
+
+        _plysActiveEffect?.Clear();
+
         Utilities.GetPlayers().ForEach(plyController => 
         {
-            RemoveOrResetPlyActiveEffects(plyController);
-            RemoveOrResetPlyDiceTimer(plyController, false);
+            RemoveOrResetPlyDiceCounter(plyController, false);
         });
+
 
         return HookResult.Continue;
     }
@@ -202,7 +277,7 @@ public class DiceSystem
         CCSPlayerController attackerController = @event.Attacker;
         CCSPlayerController victimController = @event.Userid;
 
-        if(!attackerController.IsValidPly() && !victimController.IsValidPly())
+        if(!attackerController.IsValidPly() || !victimController.IsValidPly())
             return HookResult.Continue;
 
         ulong attackerId = attackerController.GetPlyId();

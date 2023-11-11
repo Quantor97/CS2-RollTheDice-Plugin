@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
+using CounterStrikeSharp.API.Modules.Admin;
 
 namespace Preach.CS2.Plugins.RollTheDice;
 public class RollTheDice : BasePlugin
@@ -22,15 +23,21 @@ public class RollTheDice : BasePlugin
     {
         Instance = this;
 
-        var commands = new Commands();
-        DiceSystem = new DiceSystem();
-        DiceEffects = new DiceEffects();
-
         Config = new Config(ModuleDirectory);
         Config.LoadConfig();
 
         TranslationConfig = new TranslationConfig(ModuleDirectory);
         TranslationConfig.TranslationData = TranslationConfig.LoadConfig()!;
+
+        var commands = new Commands();
+        DiceSystem = new DiceSystem();
+        DiceEffects = new DiceEffects();
+
+        // DiceEffects have to be loaded after the config is loaded
+        Config.WriteFileForEffects();
+
+        // Custom commands in case the actual commands don't work
+        // var chatCommands = new ChatCommands(this);
     }
 
     public void PlyRollTheDice(CCSPlayerController plyController)
