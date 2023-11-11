@@ -9,7 +9,7 @@
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Quantor97/CS2-RollTheDice-Plugin)
 ![GitHub issues](https://img.shields.io/github/issues/Quantor97/CS2-RollTheDice-Plugin)
-![GitHub](https://img.shields.io/github/license/Quantor97/CS2-RollTheDice-Plugin)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://raw.githubusercontent.com/Quantor97/CS2-RollTheDice-Plugin/main/LICENSE.md)
 
 
 Bringing a twist of fate to your Counter-Strike 2 gameplay with a roll of the dice!
