@@ -32,11 +32,13 @@ public static class CustomExtensions
         if(translationConfig == null)
             return val;
 
-
         // Check if Key is valid and return the value
         string? translation = translationConfig.GetTranslation(translateKey, args);
         if(translation == null)
+        {
+            translationConfig.Data.TryAdd(translateKey, val);
             return val;
+        }
 
         return translation;
     }

@@ -231,7 +231,7 @@ public class DiceEffects
             return;
         
 
-        plyController.PlayerPawn.Value.GravityScale = float.Parse(scaleFactorParam);
+        plyController.PlayerPawn.Value.GravityScale *= float.Parse(scaleFactorParam);
         PrintDescription(effect, plyController, scaleFactorParam);
     }
 
@@ -241,7 +241,7 @@ public class DiceEffects
         if(effect.Parameters == null || !effect.Parameters.TryGetValue("scaleFactor", out string? scaleFactorParam))
             return;
 
-        plyController.PlayerPawn.Value.GravityScale = float.Parse(scaleFactorParam);
+        plyController.PlayerPawn.Value.GravityScale *= float.Parse(scaleFactorParam);
         PrintDescription(effect, plyController, scaleFactorParam);
     }
 
