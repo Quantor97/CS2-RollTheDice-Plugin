@@ -69,7 +69,7 @@ public class DiceSystem
             return false;
         }
 
-        if(plyRollAmountLeft > 0 || RollTheDice.Config!.GetConfigValue<bool>("UnicastRollAmount"))
+        if(plyRollAmountLeft > 0 && RollTheDice.Config!.GetConfigValue<bool>("UnicastRollAmount"))
             plyController.CustomPrint($"You have $(mark){plyRollAmountLeft}$(default) rolls left for this round!"
                 .__("dice_rolls_left", plyRollAmountLeft+""));
 
@@ -141,6 +141,43 @@ public class DiceSystem
                 .FirstOrDefault(e => roll <= e.CumulativeProbability);
     }
 
+    private void BroadOrUnicastRollMessages(CCSPlayerController target, Effect effect)
+    {
+        bool localMessage = RollTheDice.Config!.GetConfigValue<bool>("UnicastDiceRoll");
+        bool broadcastMessage = RollTheDice.Config!.GetConfigValue<bool>("BroadcastDiceRoll");
+        bool broadcastMessageTerrorists = RollTheDice.Config!.GetConfigValue<bool>("BroadcastDiceRollTerroristOnly");
+        bool broadcastMessageCounterTerrorists = RollTheDice.Config!.GetConfigValue<bool>("BroadcastDiceRolllCounterTerroristOnly");
+
+        if(localMessage)
+        {
+            target.CustomPrint($"You rolled a $(mark){effect.RollNumber}$(default) and got $(mark){effect.PrettyName}"
+                    .__("dice_rolled_local", effect.RollNumber+"", effect.PrettyName));
+        }
+
+        if(broadcastMessage || (broadcastMessageTerrorists && broadcastMessageCounterTerrorists))
+        {
+            PluginFeedback.PrintBroadcast($"$(mark){target.PlayerName}$(default) rolled a $(mark){effect.RollNumber}$(default) and got $(mark){effect.PrettyName}"
+                    .__("dice_rolled_broadcast", target.PlayerName, effect.RollNumber+"", effect.PrettyName), null, true);
+        }
+        else if(broadcastMessageTerrorists || broadcastMessageCounterTerrorists)
+        {
+            Utilities.GetPlayers().ForEach(_plyController => 
+            {
+                if(!_plyController.IsValidPly())
+                    return;
+
+                bool broadcastTerroristPly = _plyController.TeamNum == 2 && broadcastMessageTerrorists;
+                bool broadcastCounterTerroristPly = _plyController.TeamNum == 3 && broadcastMessageCounterTerrorists;
+                
+                if(broadcastTerroristPly || broadcastCounterTerroristPly)
+                {
+                    _plyController.CustomPrint($"$(mark){target.PlayerName}$(default) rolled a $(mark){effect.RollNumber}$(default) and got $(mark){effect.PrettyName}"
+                            .__("dice_rolled_broadcast", target.PlayerName, effect.RollNumber+"", effect.PrettyName));
+                }
+            });
+        }
+    }
+
     public void RollAndApplyEffect(CCSPlayerController plyController)
     {
         if(!plyController.IsValidPly())
@@ -158,21 +195,7 @@ public class DiceSystem
         else
             _plysActiveEffect.Add(plyId, effect);
 
-
-        bool localMessage = RollTheDice.Config!.GetConfigValue<bool>("UnicastDiceRoll");
-        bool broadcastMessage = RollTheDice.Config!.GetConfigValue<bool>("BroadcastDiceRoll");
-
-        if(localMessage)
-        {
-            plyController.CustomPrint($"You rolled a $(mark){effect.RollNumber}$(default) and got $(mark){effect.PrettyName}"
-                    .__("dice_rolled_local", effect.RollNumber+"", effect.PrettyName));
-        }
-
-        if(broadcastMessage)
-        {
-            PluginFeedback.PrintBroadcast($"$(mark){plyController.PlayerName}$(default) rolled a $(mark){effect.RollNumber}$(default) and got $(mark){effect.PrettyName}"
-                    .__("dice_rolled_broadcast", plyController.PlayerName, effect.RollNumber+"", effect.PrettyName), null, true);
-        }
+        BroadOrUnicastRollMessages(plyController, effect);
 
         var effectAction = effect.EffectAction;
         if(effectAction != null)

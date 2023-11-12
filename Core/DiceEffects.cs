@@ -30,7 +30,7 @@ public class DiceEffects
 
         // Effect: Nothing
         // Purpose: Do nothing
-        new Effect(5.0    ,"nothing"             ,"Nothing".__("effect_name_nothing")                   ,EffectNothing)
+        new Effect(true, 5.0    ,"nothing"             ,"Nothing".__("effect_name_nothing")                   ,EffectNothing)
             .SetDescription("Nothing will happen".__("effect_description_nothing") );
 
 
@@ -38,7 +38,7 @@ public class DiceEffects
         // Purpose: Give the player a random weapon
         // Parameters: weaponName
         // Parameter Purpose: Sets the weapon to be given (Randomly)
-        new Effect(2.0    ,"random_weapon"       ,"Random Weapon".__("effect_name_random_weapon")       ,EffectRandomWeapon)
+        new Effect(true, 2.0    ,"random_weapon"       ,"Random Weapon".__("effect_name_random_weapon")       ,EffectRandomWeapon)
             .SetDescription("You got randomly the weapon $(mark){0}".__("effect_description_random_weapon") )
             .SetParameters(new() { 
                 { "p250" , "1"  },
@@ -75,16 +75,6 @@ public class DiceEffects
                 { "sawedoff", "1" },
                 { "xm1014", "1" },
                 { "m249", "1" },
-                { "knife", "1" },
-                { "bayonet", "1" },
-                { "flip", "1" },
-                { "gut", "1" },
-                { "karambit", "1" },
-                { "m9", "1" },
-                { "huntsman", "1" },
-                { "falchion", "1" },
-                { "bowie", "1" },
-                { "butterfly", "1" },
                 { "daggers", "1" },
                 { "ursus", "1" },
                 { "navaja", "1" },
@@ -98,7 +88,7 @@ public class DiceEffects
         // Purpose: Scales the player's gravity
         // Parameters: scaleFactor
         // Parameter Purpose: Scales the player's gravity
-        new Effect(3.0    ,"low_gravity"         ,"Low Gravity".__("effect_name_low_gravity")           ,EffectLowGravity)
+        new Effect(true, 3.0    ,"low_gravity"         ,"Low Gravity".__("effect_name_low_gravity")           ,EffectLowGravity)
             .SetDescription("Your gravity is scaled by $(mark){0}".__("effect_description_low_gravity"))
             .SetParameters(new() {
                 { "scaleFactor", "0.5" }
@@ -108,7 +98,7 @@ public class DiceEffects
         // Purpose: Scales the player's gravity
         // Parameters: scaleFactor
         // Parameter Purpose: Scales the player's gravity
-        new Effect(3.0    ,"high_gravity"        ,"High Gravity".__("effect_name_high_gravity")         ,EffectHighGravity)
+        new Effect(true, 3.0    ,"high_gravity"        ,"High Gravity".__("effect_name_high_gravity")         ,EffectHighGravity)
             .SetDescription("Your gravity is scaled by $(mark){0}".__("effect_description_high_gravity"))
             .SetParameters(new() {
                 { "scaleFactor", "1.5" }
@@ -118,7 +108,7 @@ public class DiceEffects
         // Purpose: Adds health to the player
         // Parameters: amount
         // Parameter Purpose: Sets the amount of health to add
-        new Effect(2.0    ,"more_health"         ,"More Health".__("effect_name_more_health")           ,EffectMoreHealth)
+        new Effect(true, 2.0    ,"more_health"         ,"More Health".__("effect_name_more_health")           ,EffectMoreHealth)
             .SetDescription("You got $(mark){0}$(default) more health".__("effect_description_more_health"))
             .SetParameters(new() {
                 { "amount", "20" }
@@ -128,7 +118,7 @@ public class DiceEffects
         // Purpose: Removes health from the player
         // Parameters: amount
         // Parameter Purpose: Sets the amount of health to remove
-        new Effect(3    ,"less_health"         ,"Less Health".__("effect_name_less_health")           ,EffectLessHealth)
+        new Effect(true, 3    ,"less_health"         ,"Less Health".__("effect_name_less_health")           ,EffectLessHealth)
             .SetDescription("You got $(mark){0}$(default) less health".__("effect_description_less_health"))
             .SetParameters(new() { 
                 { "amount", "20" }
@@ -138,7 +128,7 @@ public class DiceEffects
         // Purpose: Scales the player's speed
         // Parameters: scaleFactor
         // Parameter Purpose: Scales the player's speed
-        new Effect(1.0    ,"increased_speed"     ,"Increased Speed".__("effect_name_increased_speed")   ,EffectIncreaseSpeed)
+        new Effect(false, 1.0    ,"increased_speed"     ,"Increased Speed".__("effect_name_increased_speed")   ,EffectIncreaseSpeed)
             .SetDescription("Your speed has been scaled to $(mark){0}".__("effect_description_increased_speed"))
             .SetParameters(new() {
                 { "scaleFactor", "3" }
@@ -148,7 +138,7 @@ public class DiceEffects
         // Purpose: Scales the player's speed
         // Parameters: scaleFactor
         // Parameter Purpose: Scales the player's speed
-        new Effect(3.0    ,"decreased_speed"     ,"Decreased Speed".__("effect_name_decreased_speed")   ,EffectDecreaseSpeed)
+        new Effect(true, 3.0    ,"decreased_speed"     ,"Decreased Speed".__("effect_name_decreased_speed")   ,EffectDecreaseSpeed)
             .SetDescription("Your speed has been scaled to $(mark){0}".__("effect_description_decreased_speed"))
             .SetParameters(new() {
                 { "scaleFactor", "0.5" }
@@ -156,7 +146,7 @@ public class DiceEffects
 
         // Effect: Vampire
         // Purpose: Steals health from the player that was hurt and gives it to Effect owner
-        new Effect(2.0   ,"vampire"             ,"Vampire".__("effect_name_vampire")                   ,EffectHookVampire, "PlayerHurt")
+        new Effect(true, 2.0   ,"vampire"             ,"Vampire".__("effect_name_vampire")                   ,EffectHookVampire, "PlayerHurt")
             .SetDescription("You will steal health from the player you hurt".__("effect_description_vampire"))
             .SetParameters(new() {
                 { "printEvent", "1" },
@@ -167,7 +157,7 @@ public class DiceEffects
         // Purpose: Steals health from the Effect owner that was hurt and gives it to Attacker
         // Parameters: scaleFactor
         // Parameter Purpose: Scales the amount of health stolen
-        new Effect(2.0    ,"mirrored_vampire"    ,"Mirrored Vampire".__("effect_name_mirrored_vampire") ,EffectHookMirroredVampire, "PlayerHurt")
+        new Effect(true, 2.0    ,"mirrored_vampire"    ,"Mirrored Vampire".__("effect_name_mirrored_vampire") ,EffectHookMirroredVampire, "PlayerHurt")
             .SetDescription("Applying Damages to players will be refelected to you".__("effect_description_mirrored_vampire"))
             .SetParameters(new() {
                 { "scaleFactor", "0.5" },
@@ -178,7 +168,7 @@ public class DiceEffects
         // Purpose: Makes the player invisible
         // Parameters: duration
         // Parameter Purpose: Sets the duration of the effect
-        new Effect(1.0    ,"invisible"           ,"Invisible".__("effect_name_invisible")               ,EffectInvisible)
+        new Effect(false, 1.0    ,"invisible"           ,"Invisible".__("effect_name_invisible")               ,EffectInvisible)
             .SetDescription("You will be invisible for $(mark){0}$(default) seconds".__("effect_description_invisible"))
             .SetParameters(new() {
                 { "duration", "10" }
@@ -236,10 +226,17 @@ public class DiceEffects
         if(effect.Parameters == null)
             return;
 
-        string weaponName = effect.Parameters.Where(x => x.Value != "0").Select(x => x.Key).ToList().ElementAt(new Random().Next(0, effect.Parameters.Count));
+        var weaponList = effect.Parameters.Where(x => x.Value != "0").Select(x => x.Key).ToList();
+
+        if(!weaponList.Any())
+            return;
+
+        string weaponName = weaponList.ElementAt(Random.Shared.Next(0, weaponList.Count));
+
         plyController.GiveNamedItem("weapon_" + weaponName);
         Helpers.PrintDescription(effect, plyController, weaponName);
     }
+
     private void EffectInvisible(Effect effect, CCSPlayerController plyController)
     {
         if(effect.Parameters == null || !effect.Parameters.TryGetValue("duration", out string? durationParam))

@@ -22,23 +22,7 @@ internal class Commands
     private void AddCommands()
     {
         // Roll the dice
-        _plugin.AddCommand("rtd", "Roll the dice!".__("cmd_description_rtd"), (ply, info) => {
-            if(!ply.IsValidPly())
-                return;
-
-            _plugin.PlyRollTheDice(ply!);
-        });
-
-        // Roll the dice alias
-        _plugin.AddCommand("r", "Roll the dice!".__("cmd_description_rtd_alias1"), (ply, info) => {
-            if(!ply.IsValidPly())
-                return;
-
-            _plugin.PlyRollTheDice(ply!);
-        });
-
-        // Roll the dice alias
-        _plugin.AddCommand("rollthedice", "Roll the dice!".__("cmd_description_rtd_alias2"), (ply, info) => {
+        _plugin.AddCommand("dice", "Roll the dice!".__("cmd_description_rtd"), (ply, info) => {
             if(!ply.IsValidPly())
                 return;
 

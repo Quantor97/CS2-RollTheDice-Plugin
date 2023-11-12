@@ -63,7 +63,7 @@ public class TranslationConfig
             { "dice_rolls_left" , "You have $(mark){0}$(default) rolls left for this round!"},
             { "dice_cant_roll_dead" , "You cannot roll the dice while dead!"},
             { "dice_wrong_team" , "You can not roll as a $(mark){0}"},
-            { "dice_notify_round_start" , "Enter $(mark)!rtd$(default) in chat to roll the dice!"}
+            { "dice_notify_round_start" , "Enter $(mark)!dice$(default) in chat to roll the dice!"}
         };
 
         TranslationData.Data = TranslationData.Data

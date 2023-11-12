@@ -27,12 +27,12 @@ public class RollTheDice : BasePlugin
         Config = new Config(ModuleDirectory);
         Config.LoadConfig();
 
+        TranslationConfig = new TranslationConfig(ModuleDirectory);
+        TranslationConfig.TranslationData = TranslationConfig.LoadConfig()!;
+
         var commands = new Commands();
         DiceSystem = new DiceSystem();
         DiceEffects = new DiceEffects();
-
-        TranslationConfig = new TranslationConfig(ModuleDirectory);
-        TranslationConfig.TranslationData = TranslationConfig.LoadConfig()!;
 
         // DiceEffects have to be loaded after the config is loaded
         Config.GetOrGenerateEffectsConfig();

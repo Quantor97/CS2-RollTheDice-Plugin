@@ -50,29 +50,34 @@ public class Effect
     // Effect hook name is used to identify the hook
     public string? EffectHookName { get; set; }
 
-    public Effect(double probability, string name, string prettyName)
+    public Effect(bool enabled, double probability, string name, string prettyName)
     {
         Effects.Add(this);
-        RollNumber = ++EffectCount;
+        Enabled = enabled;
         Probability = Probability < 0 ? probability : Probability;
-        TotalCumulativeProbability += Probability;
-
-        CumulativeProbability = TotalCumulativeProbability;
         Name = string.IsNullOrEmpty(Name) ? name : Name;
         PrettyName = string.IsNullOrEmpty(PrettyName) ? prettyName : PrettyName;
+
+        if(enabled)
+        {
+            RollNumber = ++EffectCount;
+            TotalCumulativeProbability += Probability;
+            CumulativeProbability = TotalCumulativeProbability;
+        }
+
     }
 
 
     // Effect with action (Invoked when player rolls the dice)
-    public Effect(double probability, string name, string prettyName, Action<Effect, CCSPlayerController> effectAction)
-        : this(probability, name, prettyName)
+    public Effect(bool enabled, double probability, string name, string prettyName, Action<Effect, CCSPlayerController> effectAction)
+        : this(enabled, probability, name, prettyName)
     {
         EffectAction = effectAction;
     }
 
     // Effect with hook action (Invoked when player rolls the dice and hook is called)
-    public Effect(double probability, string name, string prettyName, Action<Effect, GameEvent, GameEventInfo> effectHookAction, string effectHookName)
-        : this(probability, name, prettyName)
+    public Effect(bool enabled, double probability, string name, string prettyName, Action<Effect, GameEvent, GameEventInfo> effectHookAction, string effectHookName)
+        : this(enabled, probability, name, prettyName)
     {
         EffectHookName = effectHookName;
         EffectHookAction = effectHookAction;

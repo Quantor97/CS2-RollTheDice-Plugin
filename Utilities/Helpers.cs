@@ -67,10 +67,10 @@ internal static class Helpers
 
     public static void PrintDescription(Effect effect, CCSPlayerController plyController, params string[] args)
     {
-        if(effect.Description == null || !RollTheDice.Config!.GetConfigValue<bool>("PrintEffectDescription"))
+        if(effect.Description == null || !RollTheDice.Config!.GetConfigValue<bool>("UnicastEffectDescription"))
             return;
         
-        if(Helpers.IntepretStringArguments(effect.Description, args, out string result))
+        if(IntepretStringArguments(effect.Description, args, out string result))
         {
             plyController.CustomPrint(result);
             return;
