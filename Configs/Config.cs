@@ -127,7 +127,7 @@ public class Config
         try {
             if(ConfigData.General.TryGetValue(key, out var output))
             {
-                if(typeof(T).IsAssignableFrom(typeof(int)))
+                if(typeof(T) == typeof(int))
                 {
                     return (T)output;
                 }
@@ -203,7 +203,7 @@ public class Config
 
 			var diceRollPerRound = Helpers.GetJsonElement("DiceRollsPerRound");
 			if(diceRollPerRound != null)
-				general["DiceRollPerRound"] = ((JsonElement)diceRollPerRound).GetInt32();
+				general["DiceRollsPerRound"] = ((JsonElement)diceRollPerRound).GetInt32();
 
 /*
 			var diceRollBroadcast = Helpers.GetJsonElement("DiceRollMessageBroadcast");

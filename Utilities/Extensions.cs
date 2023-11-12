@@ -1,7 +1,9 @@
 
 using System.Diagnostics;
+using System.Drawing;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Memory;
 using Preach.CS2.Plugins;
 
 namespace Preach.CS2.Plugins.RollTheDice;
@@ -18,6 +20,31 @@ public static class CustomExtensions
     public static ulong GetPlyId(this CCSPlayerController? plyController)
     {
         return plyController?.SteamID ?? 0;
+    }
+
+    public static void ChangeColor(this CCSPlayerController? plyController, Color color)
+    {
+        if(!plyController.IsValidPly() || !plyController!.PlayerPawn!.IsValid)
+            return;
+
+        var pawnValue = plyController.PlayerPawn.Value;
+        pawnValue.Render = color;
+
+        string giveBack = "";;
+        foreach(var weapon in pawnValue.WeaponServices!.MyWeapons)
+        {
+            if(!weapon.IsValid || !weapon.Value.IsValid)
+                continue;
+            
+            if(!weapon.Value.DesignerName.Contains("knife"))
+                continue;
+                
+            giveBack = weapon.Value.DesignerName;
+            weapon.Value.Remove();
+        }
+
+        if(!string.IsNullOrEmpty(giveBack))
+            VirtualFunctions.GiveNamedItem(pawnValue.ItemServices!.Handle, giveBack, 0, 0, 0, 0);
     }
 
     public static bool IsValidPly(this CCSPlayerController? plyController)

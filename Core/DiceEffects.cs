@@ -1,7 +1,8 @@
-using System.Collections;
+using System.Drawing;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Events;
+using CounterStrikeSharp.API.Modules.Timers;
 
 namespace Preach.CS2.Plugins.RollTheDice;
 public class DiceEffects 
@@ -184,59 +185,11 @@ public class DiceEffects
             });
     }
 
-    #region Helpers
-
-    private int GetDamageInRangePlyHealth(Effect effect, EventPlayerHurt @event)
-    {
-        CCSPlayerController attackerController = @event.Attacker;
-        CCSPlayerController victimController = @event.Userid;
-
-        // Count damage that is lower than or equal the victim's health
-        float damageAmount = @event.DmgHealth; 
-        int victimHealth = victimController.PlayerPawn.Value.Health;
-        damageAmount = victimHealth < 0 ? damageAmount+victimHealth : damageAmount;
-
-        if(effect.Parameters == null || !effect.Parameters.TryGetValue("scaleFactor", out string? scaleFactorParam))
-            return (int) damageAmount;
-
-        return (int) (damageAmount * float.Parse(scaleFactorParam));
-    }
-
-    private void PrintDescription(Effect effect, CCSPlayerController plyController, params string[] args)
-    {
-        if(effect.Description == null || !RollTheDice.Config!.GetConfigValue<bool>("PrintEffectDescription"))
-            return;
-        
-        if(Helpers.IntepretStringArguments(effect.Description, args, out string result))
-        {
-            plyController.CustomPrint(result);
-            return;
-        }
-
-        plyController.CustomPrint(effect.Description!);
-    }
-
-    private T TypeCastParameter<T>(string param)
-    {
-        try {
-            return (T)Convert.ChangeType(param, typeof(T));
-        } catch(Exception e)
-        {
-            PluginFeedback.WriteConsole($"Parameter {param} is in a wrong format! Check config.json", FeedbackType.Error);
-            PluginFeedback.WriteConsole(e.Message, FeedbackType.Error);
-            PluginFeedback.WriteConsole(e.StackTrace!, FeedbackType.Error);
-        }
-
-        return default!;
-    }
-
-    #endregion
-
     #region Effects
 
     private void EffectNothing(Effect effect, CCSPlayerController plyController)
     {
-        PrintDescription(effect, plyController);
+        Helpers.PrintDescription(effect, plyController);
     }
 
     private void EffectLowGravity(Effect effect, CCSPlayerController plyController)
@@ -245,8 +198,8 @@ public class DiceEffects
             return;
         
 
-        plyController.PlayerPawn.Value.GravityScale *= TypeCastParameter<float>(scaleFactorParam);
-        PrintDescription(effect, plyController, scaleFactorParam);
+        plyController.PlayerPawn.Value.GravityScale *= Helpers.TypeCastParameter<float>(scaleFactorParam);
+        Helpers.PrintDescription(effect, plyController, scaleFactorParam);
     }
 
 
@@ -255,8 +208,8 @@ public class DiceEffects
         if(effect.Parameters == null || !effect.Parameters.TryGetValue("scaleFactor", out string? scaleFactorParam))
             return;
 
-        plyController.PlayerPawn.Value.GravityScale *= TypeCastParameter<float>(scaleFactorParam);
-        PrintDescription(effect, plyController, scaleFactorParam);
+        plyController.PlayerPawn.Value.GravityScale *= Helpers.TypeCastParameter<float>(scaleFactorParam);
+        Helpers.PrintDescription(effect, plyController, scaleFactorParam);
     }
 
     private void EffectMoreHealth(Effect effect, CCSPlayerController plyController)
@@ -264,8 +217,8 @@ public class DiceEffects
         if(effect.Parameters == null || !effect.Parameters.TryGetValue("amount", out string? healthAmount))
             return;
 
-        plyController.PlayerPawn.Value.Health += TypeCastParameter<int>(healthAmount);
-        PrintDescription(effect, plyController, healthAmount);
+        plyController.PlayerPawn.Value.Health += Helpers.TypeCastParameter<int>(healthAmount);
+        Helpers.PrintDescription(effect, plyController, healthAmount);
     }
 
     private void EffectLessHealth(Effect effect, CCSPlayerController plyController)
@@ -274,8 +227,8 @@ public class DiceEffects
             return;
 
         var plyHealth = plyController.PlayerPawn.Value.Health;
-        plyController.PlayerPawn.Value.Health = Math.Max(plyHealth - TypeCastParameter<int>(healthAmount), 1);
-        PrintDescription(effect, plyController, healthAmount);
+        plyController.PlayerPawn.Value.Health = Math.Max(plyHealth - Helpers.TypeCastParameter<int>(healthAmount), 1);
+        Helpers.PrintDescription(effect, plyController, healthAmount);
     }
 
     private void EffectRandomWeapon(Effect effect, CCSPlayerController plyController)
@@ -285,12 +238,25 @@ public class DiceEffects
 
         string weaponName = effect.Parameters.Where(x => x.Value != "0").Select(x => x.Key).ToList().ElementAt(new Random().Next(0, effect.Parameters.Count));
         plyController.GiveNamedItem("weapon_" + weaponName);
-        PrintDescription(effect, plyController, weaponName);
+        Helpers.PrintDescription(effect, plyController, weaponName);
     }
     private void EffectInvisible(Effect effect, CCSPlayerController plyController)
     {
-        // Todo
-        plyController.PlayerPawn.Value.RenderMode = RenderMode_t.kRenderGlow;
+        if(effect.Parameters == null || !effect.Parameters.TryGetValue("duration", out string? durationParam))
+            return;
+
+        var duration = Helpers.TypeCastParameter<int>(durationParam);
+        if(duration <= 0)
+            return;
+
+        plyController.ChangeColor(Color.FromArgb(255, 0, 255, 255));
+        var tmpTimer = _plugin.AddTimer(2, () => {
+            if(!plyController.IsValidPly())
+                return;
+
+            plyController.ChangeColor(Color.FromArgb(255, 255, 255, 255));
+        }, TimerFlags.REPEAT);
+
     }
 
     private void EffectIncreaseSpeed(Effect effect, CCSPlayerController plyController) 
@@ -298,8 +264,8 @@ public class DiceEffects
         if(effect.Parameters == null || !effect.Parameters.TryGetValue("scaleFactor", out string? scaleFactorParam))
             return;
 
-        plyController.PlayerPawn.Value.MovementServices!.Maxspeed *= TypeCastParameter<float>(scaleFactorParam);
-        PrintDescription(effect, plyController, scaleFactorParam);
+        plyController.PlayerPawn.Value.MovementServices!.Maxspeed *= Helpers.TypeCastParameter<float>(scaleFactorParam);
+        Helpers.PrintDescription(effect, plyController, scaleFactorParam);
     }
 
     private void EffectDecreaseSpeed(Effect effect, CCSPlayerController plyController) 
@@ -307,8 +273,8 @@ public class DiceEffects
         if(effect.Parameters == null || !effect.Parameters.TryGetValue("scaleFactor", out string? scaleFactorParam))
             return;
 
-        plyController.PlayerPawn.Value.MovementServices!.Maxspeed *= TypeCastParameter<float>(scaleFactorParam);
-        PrintDescription(effect, plyController, scaleFactorParam);
+        plyController.PlayerPawn.Value.MovementServices!.Maxspeed *= Helpers.TypeCastParameter<float>(scaleFactorParam);
+        Helpers.PrintDescription(effect, plyController, scaleFactorParam);
     }
 
     private void EffectHookVampire(Effect effect, GameEvent @gameEvent, GameEventInfo info) 
@@ -322,7 +288,7 @@ public class DiceEffects
         if(attackerController == victimController)
             return;
 
-        int damageAmount = GetDamageInRangePlyHealth(effect, @event);
+        int damageAmount = Helpers.GetDamageInRangePlyHealth(effect, @event);
         string victimName = victimController.PlayerName;
 
         attackerController.PlayerPawn.Value.Health += (int) damageAmount;
@@ -345,7 +311,7 @@ public class DiceEffects
         if(attackerController == victimController)
             return;
 
-        int damageAmount = GetDamageInRangePlyHealth(effect, @event);
+        int damageAmount = Helpers.GetDamageInRangePlyHealth(effect, @event);
         string victimName = victimController.PlayerName;
         int attackerHealth = attackerController.PlayerPawn.Value.Health;
 

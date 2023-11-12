@@ -48,5 +48,50 @@ internal static class Helpers
         
         return true;
     }
+    
+    public static int GetDamageInRangePlyHealth(Effect effect, EventPlayerHurt @event)
+    {
+        CCSPlayerController attackerController = @event.Attacker;
+        CCSPlayerController victimController = @event.Userid;
+
+        // Count damage that is lower than or equal the victim's health
+        float damageAmount = @event.DmgHealth; 
+        int victimHealth = victimController.PlayerPawn.Value.Health;
+        damageAmount = victimHealth < 0 ? damageAmount+victimHealth : damageAmount;
+
+        if(effect.Parameters == null || !effect.Parameters.TryGetValue("scaleFactor", out string? scaleFactorParam))
+            return (int) damageAmount;
+
+        return (int) (damageAmount * float.Parse(scaleFactorParam));
+    }
+
+    public static void PrintDescription(Effect effect, CCSPlayerController plyController, params string[] args)
+    {
+        if(effect.Description == null || !RollTheDice.Config!.GetConfigValue<bool>("PrintEffectDescription"))
+            return;
+        
+        if(Helpers.IntepretStringArguments(effect.Description, args, out string result))
+        {
+            plyController.CustomPrint(result);
+            return;
+        }
+
+        plyController.CustomPrint(effect.Description!);
+    }
+
+    public static T TypeCastParameter<T>(string param)
+    {
+        try {
+            return (T)Convert.ChangeType(param, typeof(T));
+        } catch(Exception e)
+        {
+            PluginFeedback.WriteConsole($"Parameter {param} is in a wrong format! Check config.json", FeedbackType.Error);
+            PluginFeedback.WriteConsole(e.Message, FeedbackType.Error);
+            PluginFeedback.WriteConsole(e.StackTrace!, FeedbackType.Error);
+        }
+
+        return default!;
+    }
+
 
 }
