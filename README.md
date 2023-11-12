@@ -35,8 +35,8 @@ Players can roll the dice for a chance to get:
 | High Gravity        | Scale the player's gravity                                                           | ✔️           |     |
 | More Health         | Add health to the player                                                             | ✔️           | Health status isn't visual updating  |
 | Less Health         | Remove health from the player                                                        | ✔️           | Health status isn't visual updating   |
-| Increased Speed     | Scale the player's speed                                                             | ✔️           | |
-| Decreased Speed     | Scale the player's speed                                                             | ❌           | |
+| Increased Speed     | Scale the player's speed                                                             | ❌           | |
+| Decreased Speed     | Scale the player's speed                                                             | ✔️           | |
 | Vampire             | Absorb health from the player upon dealing damage and transfer it to the attacker.   | ✔️           | |
 | Mirrored Vampire    | The damage dealt to players is reflected back onto the attacking player.             | ✔️           | |
 | Invisible           | Make the player invisible for specific duration                                      | ❌           | |
