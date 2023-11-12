@@ -250,13 +250,6 @@ public class DiceEffects
             return;
 
         plyController.ChangeColor(Color.FromArgb(255, 0, 255, 255));
-        var tmpTimer = _plugin.AddTimer(2, () => {
-            if(!plyController.IsValidPly())
-                return;
-
-            plyController.ChangeColor(Color.FromArgb(255, 255, 255, 255));
-        }, TimerFlags.REPEAT);
-
     }
 
     private void EffectIncreaseSpeed(Effect effect, CCSPlayerController plyController) 
