@@ -1,9 +1,8 @@
 <div align="center">
 
 <div align="center">
-  <img src="https://github.com/Quantor97/CS2-RollTheDice-Plugin/assets/45876155/2a70a2c2-ce09-4356-87cf-7216a666fc98" alt="CS2-RollTheDice-Plugin Banner" height=350px" width="350px">
+  <img src="https://i.imgur.com/S8dB2wg.png" alt="CS2-RollTheDice-Plugin Banner" height=350px" width="350px">
 </div>
-
 
 # CS2-RollTheDice-Plugin
 
