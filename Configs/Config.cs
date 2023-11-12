@@ -50,18 +50,21 @@ public class Config
 		Dictionary<string, object> configGeneral = new() 
 		{
 			{ "Language", "en" },
-			{ "DiceRollPerRound", 1 },
-			{ "DiceRollMessageBroadcast", true },
-			{ "DiceRollMessageLocal", false },
+			{ "DiceRollsPerRound", 1 },
+			{ "BroadcastDiceRoll", true },
+			{ "BroadcastPluginCommand", true },
+			{ "UnicastDiceRoll", false },
+			{ "UnicastEffectDescription", false },
+			{ "UnicastRollAmount", false },
 			{ "TsCanRoll", true},
 			{ "CTsCanRoll", false},
-			{ "NotifyAtRoundStart", true },
 			{ "ResetRollsOnRoundStart", true },
-			{ "ResetPlayerRollOnDeath", true },
+			{ "ResetRollsOnDeath", true },
 		};
 
 		ConfigData.General = configGeneral;
 	}
+
 	public void LoadConfig()
 	{
 		PluginFeedback.WriteConsole("Checking config file...", FeedbackType.Info);
@@ -77,6 +80,7 @@ public class Config
 		}
 
 		SubstituteConfigObjectsForGeneral();
+		SubstituteConfigObjectsForEffects();
 	}
 
 	private void CreateAndWriteFile(string path)
@@ -94,11 +98,12 @@ public class Config
 		File.WriteAllText(path, jsonConfig);
 	}
 
-	public void WriteFileForEffects()
+	public void GetOrGenerateEffectsConfig()
 	{
 		if(ConfigData.Effects.Count != 0)
 		{
-			PluginFeedback.WriteConsole("Config loaded!", FeedbackType.Info);
+			SubstituteConfigObjectsForEffects();
+			PluginFeedback.WriteConsole("Config loaded!!", FeedbackType.Info);
 			return;
 		}
 
@@ -117,6 +122,32 @@ public class Config
 		PluginFeedback.WriteConsole("Config loaded!", FeedbackType.Info);
 	}
 
+    public T GetConfigValue<T>(string key)
+    {
+        try {
+            if(ConfigData.General.TryGetValue(key, out var output))
+            {
+                if(typeof(T).IsAssignableFrom(typeof(int)))
+                {
+                    return (T)output;
+                }
+                else if(typeof(T) == typeof(bool))
+                {
+                    JsonElement value = (JsonElement)output;
+                    return (T)((object) value.GetBoolean());
+                }
+            }
+        }
+        catch(Exception e)
+        {
+            PluginFeedback.WriteConsole($"Error while getting config value for {key}", FeedbackType.Error);
+            PluginFeedback.WriteConsole(e.Message, FeedbackType.Error);
+            PluginFeedback.WriteConsole(e.StackTrace!, FeedbackType.Error);
+        }
+        
+        return default(T)!;
+    }
+
 	private void SubstituteConfigObjectsForEffects()
 	{
 		var effects = Effect.Effects;
@@ -124,7 +155,9 @@ public class Config
 		if(effects == null)
 			return;
 
-		PluginFeedback.WriteConsole($"ConfigData.Effects.Count: {ConfigData.Effects.Count}", FeedbackType.Info);
+		if(ConfigData.Effects.Count == 0)
+			return;
+
 		Effect.TotalCumulativeProbability = 0;
 
 		try 
@@ -159,13 +192,16 @@ public class Config
 	{
 		var general = ConfigData.General;
 
+		if(general.Count == 0)
+			return;
+
 		try 
 		{
 			var language = Helpers.GetJsonElement("Language");
 			if(language != null)
 				general["Language"] = ((JsonElement)language).GetString()!;
 
-			var diceRollPerRound = Helpers.GetJsonElement("DiceRollPerRound");
+			var diceRollPerRound = Helpers.GetJsonElement("DiceRollsPerRound");
 			if(diceRollPerRound != null)
 				general["DiceRollPerRound"] = ((JsonElement)diceRollPerRound).GetInt32();
 

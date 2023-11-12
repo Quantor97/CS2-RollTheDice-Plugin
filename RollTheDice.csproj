@@ -16,5 +16,6 @@
 
   <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
     <Copy SourceFiles="./bin/Debug/net7.0/$(ClassName).dll" DestinationFolder="$(DestinationFolder)/$(ClassName)/" />
+    <Copy SourceFiles="./bin/Debug/net7.0/$(ClassName).dll" DestinationFolder="addons/counterstrikesharp/plugins/$(ClassName)/" />
   </Target>
 </Project>

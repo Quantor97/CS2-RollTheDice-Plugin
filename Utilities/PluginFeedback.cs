@@ -99,9 +99,7 @@ internal static class PluginFeedback
         string output = GetMessageOutput(false, message, feedbackType);
 
         ply.PrintToChat(output);
-
-        if(withConsole)
-            ply.PrintToConsole(output);
+        ply.PrintToConsole(output);
     }
 
     public static void PrintBroadcast(string message, FeedbackType? feedbackType = FeedbackType.Chat, bool withConsole = false)
@@ -111,14 +109,12 @@ internal static class PluginFeedback
         Server.PrintToChatAll(output);
 
         if(withConsole)
-            Server.PrintToConsole(output);
+            WriteConsole(message, feedbackType);
     }
 
     public static void WriteConsole(string message, FeedbackType? feedbackType = FeedbackType.Chat)
     {
         string output = GetMessageOutput(true, message, feedbackType);
-
-
 
         SetConsoleColors(feedbackType);
         Console.WriteLine(output);

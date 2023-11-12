@@ -48,6 +48,11 @@ internal class Commands
         // Reload config
         _plugin.AddCommand("rtd_reloadconfig", "Reload the config file!".__("cmd_description_reload_config"), [RequiresPermissions("@css/generic")] (ply, info) => {
             _plugin.ReloadConfig();
+
+            if(ply.IsValidPly())
+                ply!.CustomPrint("Config reloaded!", FeedbackType.Chat);
+            
+            PluginFeedback.WriteConsole("Config reloaded!", FeedbackType.Info);
         });
     }
 

@@ -98,7 +98,7 @@ public class DiceEffects
         // Parameters: scaleFactor
         // Parameter Purpose: Scales the player's gravity
         new Effect(3.0    ,"low_gravity"         ,"Low Gravity".__("effect_name_low_gravity")           ,EffectLowGravity)
-            .SetDescription("Your gravity is scaled to $(mark){0}".__("effect_description_low_gravity"))
+            .SetDescription("Your gravity is scaled by $(mark){0}".__("effect_description_low_gravity"))
             .SetParameters(new() {
                 { "scaleFactor", "0.5" }
             });
@@ -108,7 +108,7 @@ public class DiceEffects
         // Parameters: scaleFactor
         // Parameter Purpose: Scales the player's gravity
         new Effect(3.0    ,"high_gravity"        ,"High Gravity".__("effect_name_high_gravity")         ,EffectHighGravity)
-            .SetDescription("Your gravity is scaled to $(mark){0}".__("effect_description_high_gravity"))
+            .SetDescription("Your gravity is scaled by $(mark){0}".__("effect_description_high_gravity"))
             .SetParameters(new() {
                 { "scaleFactor", "1.5" }
             });
@@ -158,8 +158,8 @@ public class DiceEffects
         new Effect(2.0   ,"vampire"             ,"Vampire".__("effect_name_vampire")                   ,EffectHookVampire, "PlayerHurt")
             .SetDescription("You will steal health from the player you hurt".__("effect_description_vampire"))
             .SetParameters(new() {
-                { "scaleFactor", "0.5" },
-                { "printLocal", "1"}
+                { "printEvent", "1" },
+                { "scaleFactor", "0.5" }
             });
 
         // Effect: Mirrored Vampire
@@ -170,7 +170,7 @@ public class DiceEffects
             .SetDescription("Applying Damages to players will be refelected to you".__("effect_description_mirrored_vampire"))
             .SetParameters(new() {
                 { "scaleFactor", "0.5" },
-                { "printLocal", "1"}
+                { "printEvent", "1"}
             });
 
         // Effet: Invisible
@@ -178,7 +178,7 @@ public class DiceEffects
         // Parameters: duration
         // Parameter Purpose: Sets the duration of the effect
         new Effect(1.0    ,"invisible"           ,"Invisible".__("effect_name_invisible")               ,EffectInvisible)
-            .SetDescription("You will be invisible".__("effect_description_invisible"))
+            .SetDescription("You will be invisible for $(mark){0}$(default) seconds".__("effect_description_invisible"))
             .SetParameters(new() {
                 { "duration", "10" }
             });
@@ -204,7 +204,7 @@ public class DiceEffects
 
     private void PrintDescription(Effect effect, CCSPlayerController plyController, params string[] args)
     {
-        if(effect.Description == null)
+        if(effect.Description == null || !RollTheDice.Config!.GetConfigValue<bool>("PrintEffectDescription"))
             return;
         
         if(Helpers.IntepretStringArguments(effect.Description, args, out string result))
@@ -214,6 +214,20 @@ public class DiceEffects
         }
 
         plyController.CustomPrint(effect.Description!);
+    }
+
+    private T TypeCastParameter<T>(string param)
+    {
+        try {
+            return (T)Convert.ChangeType(param, typeof(T));
+        } catch(Exception e)
+        {
+            PluginFeedback.WriteConsole($"Parameter {param} is in a wrong format! Check config.json", FeedbackType.Error);
+            PluginFeedback.WriteConsole(e.Message, FeedbackType.Error);
+            PluginFeedback.WriteConsole(e.StackTrace!, FeedbackType.Error);
+        }
+
+        return default!;
     }
 
     #endregion
@@ -231,7 +245,7 @@ public class DiceEffects
             return;
         
 
-        plyController.PlayerPawn.Value.GravityScale *= float.Parse(scaleFactorParam);
+        plyController.PlayerPawn.Value.GravityScale *= TypeCastParameter<float>(scaleFactorParam);
         PrintDescription(effect, plyController, scaleFactorParam);
     }
 
@@ -241,7 +255,7 @@ public class DiceEffects
         if(effect.Parameters == null || !effect.Parameters.TryGetValue("scaleFactor", out string? scaleFactorParam))
             return;
 
-        plyController.PlayerPawn.Value.GravityScale *= float.Parse(scaleFactorParam);
+        plyController.PlayerPawn.Value.GravityScale *= TypeCastParameter<float>(scaleFactorParam);
         PrintDescription(effect, plyController, scaleFactorParam);
     }
 
@@ -250,7 +264,7 @@ public class DiceEffects
         if(effect.Parameters == null || !effect.Parameters.TryGetValue("amount", out string? healthAmount))
             return;
 
-        plyController.PlayerPawn.Value.Health += int.Parse(healthAmount);
+        plyController.PlayerPawn.Value.Health += TypeCastParameter<int>(healthAmount);
         PrintDescription(effect, plyController, healthAmount);
     }
 
@@ -260,7 +274,7 @@ public class DiceEffects
             return;
 
         var plyHealth = plyController.PlayerPawn.Value.Health;
-        plyController.PlayerPawn.Value.Health = Math.Max(plyHealth - int.Parse(healthAmount), 1);
+        plyController.PlayerPawn.Value.Health = Math.Max(plyHealth - TypeCastParameter<int>(healthAmount), 1);
         PrintDescription(effect, plyController, healthAmount);
     }
 
@@ -284,7 +298,7 @@ public class DiceEffects
         if(effect.Parameters == null || !effect.Parameters.TryGetValue("scaleFactor", out string? scaleFactorParam))
             return;
 
-        plyController.PlayerPawn.Value.MovementServices!.Maxspeed *= float.Parse(scaleFactorParam);
+        plyController.PlayerPawn.Value.MovementServices!.Maxspeed *= TypeCastParameter<float>(scaleFactorParam);
         PrintDescription(effect, plyController, scaleFactorParam);
     }
 
@@ -293,7 +307,7 @@ public class DiceEffects
         if(effect.Parameters == null || !effect.Parameters.TryGetValue("scaleFactor", out string? scaleFactorParam))
             return;
 
-        plyController.PlayerPawn.Value.MovementServices!.Maxspeed *= float.Parse(scaleFactorParam);
+        plyController.PlayerPawn.Value.MovementServices!.Maxspeed *= TypeCastParameter<float>(scaleFactorParam);
         PrintDescription(effect, plyController, scaleFactorParam);
     }
 
@@ -313,7 +327,7 @@ public class DiceEffects
 
         attackerController.PlayerPawn.Value.Health += (int) damageAmount;
 
-        if(effect.Parameters == null || !effect.Parameters.TryGetValue("printLocal", out string? printLocalParam) || printLocalParam != "1")
+        if(effect.Parameters == null || !effect.Parameters.TryGetValue("printEvent", out string? printLocalParam) || printLocalParam != "1")
             return;
 
         attackerController.CustomPrint($"[$(mark2){effect.PrettyName}$(default)] You stole $(mark){damageAmount}$(default) health from $(mark){victimName}"
@@ -338,7 +352,7 @@ public class DiceEffects
         // Health less than 1 crashes the server
         attackerController.PlayerPawn.Value.Health = Math.Max( attackerHealth - damageAmount, 1);
 
-        if(effect.Parameters == null || !effect.Parameters.TryGetValue("printLocal", out string? printLocalParam) || printLocalParam != "1")
+        if(effect.Parameters == null || !effect.Parameters.TryGetValue("printEvent", out string? printLocalParam) || printLocalParam != "1")
             return;
 
         attackerController.CustomPrint($"[$(mark2){effect.PrettyName}$(default)] {victimName} stole $(mark){damageAmount}$(default) health from $(mark)You"

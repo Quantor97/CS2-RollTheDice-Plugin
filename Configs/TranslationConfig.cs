@@ -66,8 +66,6 @@ public class TranslationConfig
             { "dice_notify_round_start" , "Enter $(mark)!rtd$(default) in chat to roll the dice!"}
         };
 
-        var data = TranslationData.Data;
-
         TranslationData.Data = TranslationData.Data
             .Concat(configTranslation)
             .ToLookup(pair => pair.Key, pair => pair.Value)

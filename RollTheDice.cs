@@ -7,7 +7,7 @@ using CounterStrikeSharp.API.Modules.Admin;
 namespace Preach.CS2.Plugins.RollTheDice;
 public class RollTheDice : BasePlugin
 {
-    public static readonly bool DEBUG = true;
+    public static readonly bool DEBUG = false;
     public override string ModuleName => "Roll The Dice";
     public override string ModuleDescription => "Roll The Dice or RTD is a plugin that allows players to roll the dice and get a random effect.";
     public override string ModuleVersion => "0.5.0";
@@ -26,7 +26,6 @@ public class RollTheDice : BasePlugin
         Config = new Config(ModuleDirectory);
         Config.LoadConfig();
 
-
         var commands = new Commands();
         DiceSystem = new DiceSystem();
         DiceEffects = new DiceEffects();
@@ -35,7 +34,7 @@ public class RollTheDice : BasePlugin
         TranslationConfig.TranslationData = TranslationConfig.LoadConfig()!;
 
         // DiceEffects have to be loaded after the config is loaded
-        Config.WriteFileForEffects();
+        Config.GetOrGenerateEffectsConfig();
 
         // Custom commands in case the actual commands don't work
         // var chatCommands = new ChatCommands(this);
@@ -43,7 +42,7 @@ public class RollTheDice : BasePlugin
 
     public void PlyRollTheDice(CCSPlayerController plyController)
     {
-        DiceSystem?.RollDice(plyController);
+        DiceSystem?.PreRollDice(plyController);
     }
 
     public void ReloadConfig()

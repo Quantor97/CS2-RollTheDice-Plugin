@@ -35,42 +35,6 @@ public class DiceSystem
             _plysActiveEffect = new Dictionary<ulong, Effect>();
     }
 
-    private int GetConfigValueInt(string key)
-    {
-        try {
-            if(Config.ConfigData.General.TryGetValue(key, out var output))
-            {
-                return (int)output;
-            }
-        }
-        catch(Exception e)
-        {
-            PluginFeedback.WriteConsole($"Error while getting config value for {key} (Contact Server Owner)", FeedbackType.Error);
-            PluginFeedback.WriteConsole(e.Message, FeedbackType.Error);
-            PluginFeedback.WriteConsole(e.StackTrace!, FeedbackType.Error);
-        }
-        
-        return 0;
-    }
-
-    private bool GetConfigValueBool(string key)
-    {
-        try {
-            if(Config.ConfigData.General.TryGetValue(key, out var output))
-            {
-                JsonElement value = (JsonElement)output;
-                return value.GetBoolean();
-            }
-        }
-        catch(Exception e)
-        {
-            PluginFeedback.WriteConsole($"Error while getting config value for {key} (Contact Server Owner)", FeedbackType.Error);
-            PluginFeedback.WriteConsole(e.Message, FeedbackType.Error);
-            PluginFeedback.WriteConsole(e.StackTrace!, FeedbackType.Error);
-        }
-        
-        return false;
-    }
 
     private void RemoveOrResetPlyDiceCounter(CCSPlayerController plyController, bool isRemove)
     {
@@ -85,7 +49,7 @@ public class DiceSystem
         if(isRemove)
             _plyRollCounter.Remove(plyId);
         else 
-            _plyRollCounter[plyId] = GetConfigValueInt("DiceRollPerRound");
+            _plyRollCounter[plyId] = RollTheDice.Config!.GetConfigValue<int>("DiceRollsPerRound");
     }
 
     public bool CanRoll(CCSPlayerController plyController)
@@ -93,7 +57,7 @@ public class DiceSystem
         ulong plyId = plyController.GetPlyId();
 
         if(!_plyRollCounter!.ContainsKey(plyId))
-            _plyRollCounter.Add(plyId, GetConfigValueInt("DiceRollPerRound"));
+            _plyRollCounter.Add(plyId, RollTheDice.Config!.GetConfigValue<int>("DiceRollsPerRound"));
 
         int plyRollAmountLeft = --_plyRollCounter[plyId];
 
@@ -105,7 +69,7 @@ public class DiceSystem
             return false;
         }
 
-        if(plyRollAmountLeft > 0)
+        if(plyRollAmountLeft > 0 || RollTheDice.Config!.GetConfigValue<bool>("UnicastRollAmount"))
             plyController.CustomPrint($"You have $(mark){plyRollAmountLeft}$(default) rolls left for this round!"
                 .__("dice_rolls_left", plyRollAmountLeft+""));
 
@@ -123,8 +87,8 @@ public class DiceSystem
             return false;
         }
 
-        bool canCTRoll = GetConfigValueBool("CTsCanRoll");
-        bool canTRoll = GetConfigValueBool("TsCanRoll");
+        bool canCTRoll = RollTheDice.Config!.GetConfigValue<bool>("CTsCanRoll");
+        bool canTRoll = RollTheDice.Config!.GetConfigValue<bool>("TsCanRoll");
 
         var teamName = "";
         switch(plyController.TeamNum)
@@ -151,7 +115,7 @@ public class DiceSystem
         return true;
     }
 
-    public void RollDice(CCSPlayerController plyController)
+    public void PreRollDice(CCSPlayerController plyController)
     {
         if(!plyController.IsValidPly() || !CheckTeamAndLifeState(plyController) || !CanRoll(plyController))
             return;
@@ -165,7 +129,7 @@ public class DiceSystem
 
         if(effectsList == null)
         {
-            PluginFeedback.PrintBroadcast("Dice effects are null", FeedbackType.Error);
+            PluginFeedback.WriteConsole("No effects found", FeedbackType.Error);
             return null;
         }
 
@@ -195,8 +159,8 @@ public class DiceSystem
             _plysActiveEffect.Add(plyId, effect);
 
 
-        bool localMessage = GetConfigValueBool("DiceRollMessageLocal");
-        bool broadcastMessage = GetConfigValueBool("DiceRollMessageBroadcast");
+        bool localMessage = RollTheDice.Config!.GetConfigValue<bool>("UnicastDiceRoll");
+        bool broadcastMessage = RollTheDice.Config!.GetConfigValue<bool>("BroadcastDiceRoll");
 
         if(localMessage)
         {
@@ -207,7 +171,7 @@ public class DiceSystem
         if(broadcastMessage)
         {
             PluginFeedback.PrintBroadcast($"$(mark){plyController.PlayerName}$(default) rolled a $(mark){effect.RollNumber}$(default) and got $(mark){effect.PrettyName}"
-                    .__("dice_rolled_broadcast", plyController.PlayerName, effect.RollNumber+"", effect.PrettyName));
+                    .__("dice_rolled_broadcast", plyController.PlayerName, effect.RollNumber+"", effect.PrettyName), null, true);
         }
 
         var effectAction = effect.EffectAction;
@@ -243,7 +207,7 @@ public class DiceSystem
 
     public HookResult HandlePlayerDeath(EventPlayerDeath @event, GameEventInfo info)
     {
-        if(!GetConfigValueBool("ResetPlayerRollOnDeath"))
+        if(!RollTheDice.Config!.GetConfigValue<bool>("ResetRollsOnDeath"))
             return HookResult.Continue;
 
         CCSPlayerController plyController = @event.Userid;
@@ -255,10 +219,10 @@ public class DiceSystem
 
     public HookResult HandleRoundStart(EventRoundStart @event, GameEventInfo info)
     {
-        if(GetConfigValueBool("NotifyAtRoundStart"))
+        if(RollTheDice.Config!.GetConfigValue<bool>("BroadcastPluginCommand"))
             PluginFeedback.PrintBroadcast("Enter $(mark)!rtd$(default) in chat to roll the dice!".__("dice_notify_round_start"), FeedbackType.Chat);
 
-        if(!GetConfigValueBool("ResetRollsOnRoundStart"))
+        if(!RollTheDice.Config!.GetConfigValue<bool>("ResetRollsOnRoundStart"))
             return HookResult.Continue;
 
         _plysActiveEffect?.Clear();
