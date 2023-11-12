@@ -11,15 +11,17 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://raw.githubusercontent.com/Quantor97/CS2-RollTheDice-Plugin/main/LICENSE.md)
 
 
-Bringing a twist of fate to your Counter-Strike 2 gameplay with a roll of the dice!
+With this plugin, players have the exciting opportunity to roll the dice, triggering unique and unpredictable effects.
+Originally designed for the JailBreak GameMode, it seamlessly integrates into any other GameMode, offering versatility in its usage.
 
 </div>
 
 ## 🌟 Features
-
-- **Localization**: Make the plugin accessible to a global audience by translating it into multiple languages.
+- **Varied Effects**: Each dice roll grants the player a distinct effect, ranging from power-ups to challenges, 
+- **Dice Rolling Mechanism**: Players can roll the dice, adding an element of chance and excitement to the gameplay.
+- **Localization**: Make the plugin accessible to your local audience by translating it into your language.
 - **Customizable Effects**: Configure the likelihood of each effect occurring to fine-tune the gaming experience.
-- **General Settings**: Adjust general plugin settings, including language selection, directly within the configuration file.
+- **Configurability:** Enjoy the flexibility to fine-tune and configure various aspects of the plugin to suit your server's preferences.
 
 ## 🎲 Roll Effects
 
@@ -50,10 +52,10 @@ Players can roll the dice for a chance to get:
 
 ## ⚙️ Configuration
 
-Fine-tune the effects and probabilities in the `config.cfg` file. Set the general language and other settings to match your server's requirements.
-Two files are generated: config.json and a default en.json file in "translations" folder. In config.json, all effects provided by the plugin are listed in the "effects" section, and there is a "general" section providing general settings for the plugin.
+After the initialization of the plugin, two files and a folder are created. Firstly, the Config.json file is generated, which holds the plugin settings. Secondly, the en.json file is created along with the 'translation' folder. The Config.json is intended for adjusting effects and general settings, while en.json is used for translation.
+In config.json, all effects provided by the plugin are listed in the "effects" section, and there is a "general" section providing general settings for the plugin.
 
-To change the language of the plugin, you need to change the "language" attribute in the config.json and further create (or have the plugin create) a file in the "translations" folder with the same name as specified in the "config" file. Translate your content there. For reference, you can use the default en.json. I recommend using ChatGPT for translation to avoid formatting issues.
+To switch the plugin's language, modify the 'language' attribute in the config.json and then either manually create or let the plugin generate a file in the 'translations' folder with the identical name specified in the 'config' file. Translate your content within that file. For guidance, you can refer to the default en.json. I suggest using ChatGPT for translation to prevent formatting issues
 
 A description for the **general** section in config.json:
 - **Language**: Determines the language for all translations.
@@ -88,7 +90,7 @@ Please follow the installation instructions provided on their respective website
 
 ## 🚀 Installation
 
-1. Download the latest release.
+1. Download the [latest release](https://github.com/Quantor97/CS2-RollTheDice-Plugin/releases)
 2. Make sure you have CounterStrikeSharp and Metamod installed
 3. Place the addons folder into your server's CounterStrikeSharp plugin directory.
 4. Restart your server to see the plugin in action.
