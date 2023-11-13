@@ -64,8 +64,6 @@ jobs:
         prerelease: false
         body: |
           Release of ${{ steps.module_info.outputs.module_name }} version ${{ steps.module_info.outputs.module_version }}.
-        assets: |
-          ./release/${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.zip
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
