@@ -45,11 +45,12 @@ jobs:
 
     - name: Create DLL with version and path
       run: |
-        mkdir -p "./addons/counterstrikesharp/plugins/${{ steps.project_info.outputs.project_dll_name }}"
-        cp "./publish/${{ steps.project_info.outputs.project_dll_name }}.dll" "./addons/counterstrikesharp/plugins/${{ steps.project_info.outputs.project_dll_name }}/${{ steps.project_info.outputs.project_dll_name }}-${{ steps.project_info.outputs.module_version }}.dll"
+        mkdir -p "./addons/counterstrikesharp/plugins/${{ steps.module_info.outputs.module_name }}"
+        cp "./publish/${{ steps.module_info.outputs.module_name }}.dll" "./addons/counterstrikesharp/plugins/${{ steps.module_info.outputs.module_name }}/${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.dll"
       
     - name: Upload DLL
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ steps.project_info.outputs.project_dll_name }}-${{ steps.project_info.outputs.module_version }}.dll
-        path: ./addons/counterstrikesharp/plugins/${{ steps.project_info.outputs.project_dll_name }}/${{ steps.project_info.outputs.project_dll_name }}-${{ steps.project_info.outputs.module_version }}.dll
+        name: ${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.dll
+        path: ./addons/counterstrikesharp/plugins/${{ steps.module_info.outputs.module_name }}/${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.dll
+
