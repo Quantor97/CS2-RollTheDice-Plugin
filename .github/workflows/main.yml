@@ -1,0 +1,53 @@
+name: .NET CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [created]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '7.0.x' # Aktualisiert auf .NET 7
+
+    - name: Extract project info
+      id: project_info
+      run: |
+        CLASS_NAME=$(grep -oP '(?<=<ClassName Condition=" \'$(ClassName)\' == \'\' ">).*(?=</ClassName>)' RollTheDice.csproj)
+        MODULE_VERSION=$(grep -oP '(?<=<ModuleVersion>).*(?=</ModuleVersion>)' RollTheDice.csproj)
+        echo "Project DLL Name: $CLASS_NAME"
+        echo "Module Version: $MODULE_VERSION"
+        echo "::set-output name=project_dll_name::$CLASS_NAME"
+        echo "::set-output name=module_version::$MODULE_VERSION"
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore -c Release -o ./build
+
+    - name: Test
+      run: dotnet test --no-build -c Release --verbosity normal
+
+    - name: Publish
+      run: dotnet publish --no-build -c Release -o ./publish
+
+    - name: Create DLL with version and path
+      run: |
+        cp "./publish/${{ steps.project_info.outputs.project_dll_name }}.dll" "./addons/counterstrikesharp/plugins/${{ steps.project_info.outputs.project_dll_name }}/${{ steps.project_info.outputs.project_dll_name }}-${{ steps.project_info.outputs.module_version }}.dll"
+      
+    - name: Upload DLL
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ steps.project_info.outputs.project_dll_name }}-${{ steps.project_info.outputs.module_version }}.dll
+        path: ./addons/counterstrikesharp/plugins/${{ steps.project_info.outputs.project_dll_name }}/${{ steps.project_info.outputs.project_dll_name }}-${{ steps.project_info.outputs.module_version }}.dll
