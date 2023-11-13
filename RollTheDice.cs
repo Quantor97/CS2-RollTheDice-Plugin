@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Data;
+using System.Drawing;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
@@ -11,7 +12,7 @@ public class RollTheDice : BasePlugin
     public static readonly bool DEBUG = false;
     public override string ModuleName => "Roll The Dice";
     public override string ModuleDescription => "Roll The Dice or RTD is a plugin that allows players to roll the dice and get a random effect.";
-    public override string ModuleVersion => "0.5.0";
+    public override string ModuleVersion => "1.0.0";
     public override string ModuleAuthor => "Preach";
 
     public static DiceSystem? DiceSystem;
@@ -40,6 +41,7 @@ public class RollTheDice : BasePlugin
         // Custom commands in case the actual commands don't work
         // var chatCommands = new ChatCommands(this);
     }
+
 
     public void PlyRollTheDice(CCSPlayerController plyController)
     {

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Text.Json;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Core.Attributes.Registration;
 
 namespace Preach.CS2.Plugins.RollTheDice;
 public class DiceSystem 
@@ -161,11 +162,8 @@ public class DiceSystem
         }
         else if(broadcastMessageTerrorists || broadcastMessageCounterTerrorists)
         {
-            Utilities.GetPlayers().ForEach(_plyController => 
+            Utilities.GetPlayers().Where(_plyRollCounter => _plyRollCounter.IsValidPly()).ToList().ForEach(_plyController => 
             {
-                if(!_plyController.IsValidPly())
-                    return;
-
                 bool broadcastTerroristPly = _plyController.TeamNum == 2 && broadcastMessageTerrorists;
                 bool broadcastCounterTerroristPly = _plyController.TeamNum == 3 && broadcastMessageCounterTerrorists;
                 
@@ -264,7 +262,7 @@ public class DiceSystem
         CCSPlayerController attackerController = @event.Attacker;
         CCSPlayerController victimController = @event.Userid;
 
-        if(!attackerController.IsValidPly() || !victimController.IsValidPly())
+        if(!attackerController.IsValidPly() || victimController is {IsValid: false, PlayerPawn.IsValid: false})
             return HookResult.Continue;
 
         ulong attackerId = attackerController.GetPlyId();

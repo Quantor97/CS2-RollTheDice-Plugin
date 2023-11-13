@@ -43,8 +43,8 @@ public static class CustomExtensions
             weapon.Value.Remove();
         }
 
-        if(!string.IsNullOrEmpty(giveBack))
-            VirtualFunctions.GiveNamedItem(pawnValue.ItemServices!.Handle, giveBack, 0, 0, 0, 0);
+        // if(!string.IsNullOrEmpty(giveBack))
+            // VirtualFunctions.GiveNamedItem(pawnValue.ItemServices!.Handle, giveBack, 0, 0, 0, 0);
     }
 
     public static bool IsValidPly(this CCSPlayerController? plyController)

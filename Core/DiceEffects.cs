@@ -247,6 +247,10 @@ public class DiceEffects
             return;
 
         plyController.ChangeColor(Color.FromArgb(255, 0, 255, 255));
+
+        RollTheDice.Instance!.AddTimer(duration, () => {
+            plyController.ChangeColor(Color.FromArgb(255, 255, 255, 255));
+        });
     }
 
     private void EffectIncreaseSpeed(Effect effect, CCSPlayerController plyController) 
@@ -275,7 +279,7 @@ public class DiceEffects
         CCSPlayerController attackerController = @event.Attacker;
         CCSPlayerController victimController = @event.Userid;
 
-        if(attackerController == victimController)
+        if(attackerController == victimController || attackerController.TeamNum == victimController.TeamNum)
             return;
 
         int damageAmount = Helpers.GetDamageInRangePlyHealth(effect, @event);
@@ -298,7 +302,7 @@ public class DiceEffects
         CCSPlayerController attackerController = @event.Attacker;
         CCSPlayerController victimController = @event.Userid;
 
-        if(attackerController == victimController)
+        if(attackerController == victimController || attackerController.TeamNum == victimController.TeamNum)
             return;
 
         int damageAmount = Helpers.GetDamageInRangePlyHealth(effect, @event);
