@@ -20,12 +20,14 @@ jobs:
       with:
         dotnet-version: '7.0.x' # Aktualisiert auf .NET 7
 
-    - name: Extract Module Info
+    - name: Extract Module Info from CS file
       id: module_info
       run: |
         CS_FILE=$(find . -name '*.cs' -print -quit)
-        MODULE_NAME=$(grep -oP '(?<=public override string ModuleName => ").*(?=";)' "$CS_FILE")
+        MODULE_NAME_RAW=$(grep -oP '(?<=public override string ModuleName => ").*(?=";)' "$CS_FILE")
+        MODULE_NAME="${MODULE_NAME_RAW// /}" # Remove all spaces from the module name
         MODULE_VERSION=$(grep -oP '(?<=public override string ModuleVersion => ").*(?=";)' "$CS_FILE")
+        MODULE_VERSION="${MODULE_VERSION// /}" # Remove all spaces from the module version
         echo "Module Name: $MODULE_NAME"
         echo "Module Version: $MODULE_VERSION"
         echo "::set-output name=module_name::$MODULE_NAME"
