@@ -47,13 +47,28 @@ jobs:
 
     - name: Archive DLL with folder structure
       run: |
-        DLL_NAME="${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.dll"
-        DLL_PATH="./publish/${DLL_NAME}"
-        ZIP_PATH="./release/${DLL_NAME}.zip"
-        DEST_PATH="addons/counterstrikesharp/plugins/${{ steps.module_info.outputs.module_name }}/"
-        mkdir -p "release/$DEST_PATH"
-        cp "$DLL_PATH" "release/$DEST_PATH"
-        (cd release && zip -r "$ZIP_PATH" "./$DEST_PATH")
+        MODULE_NAME="${{ steps.module_info.outputs.module_name }}"
+        MODULE_VERSION="${{ steps.module_info.outputs.module_version }}"
+        DLL_NAME="${MODULE_NAME}-${MODULE_VERSION}.dll"
+        PUBLISH_DIR="./publish"
+        ZIP_DIR="./release"
+        DEST_DIR="addons/counterstrikesharp/plugins/${MODULE_NAME}/"
+        
+        # Create directories
+        mkdir -p "$ZIP_DIR/$DEST_DIR"
+        
+        # Ensure the DLL exists
+        if [ ! -f "$PUBLISH_DIR/$DLL_NAME" ]; then
+            echo "DLL not found: $PUBLISH_DIR/$DLL_NAME"
+            exit 1
+        fi
+    
+        # Copy the DLL to the destination directory
+        cp "$PUBLISH_DIR/$DLL_NAME" "$ZIP_DIR/$DEST_DIR"
+    
+        # Create the ZIP file
+        (cd "$ZIP_DIR" && zip -r "${DLL_NAME}.zip" "$DEST_DIR")
+
 
     - name: Create Release
       id: create_release
