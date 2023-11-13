@@ -44,6 +44,7 @@ jobs:
 
     - name: Create DLL with version and path
       run: |
+        mkdir -p "./addons/counterstrikesharp/plugins/${{ steps.project_info.outputs.project_dll_name }}"
         cp "./publish/${{ steps.project_info.outputs.project_dll_name }}.dll" "./addons/counterstrikesharp/plugins/${{ steps.project_info.outputs.project_dll_name }}/${{ steps.project_info.outputs.project_dll_name }}-${{ steps.project_info.outputs.module_version }}.dll"
       
     - name: Upload DLL
