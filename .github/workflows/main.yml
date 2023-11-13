@@ -70,8 +70,17 @@ jobs:
         # Create the ZIP file
         (cd "$ZIP_DIR" && zip -r "$ZIP_FILE" ".")
 
-
-
+    - name: Check if tag already exists
+      id: check_tag
+      run: |
+        if git rev-parse ${{ steps.module_info.outputs.module_version }} >/dev/null 2>&1
+        then
+          echo "Tag ${{ steps.module_info.outputs.module_version }} exists! Deleting..."
+          git tag -d ${{ steps.module_info.outputs.module_version }}
+          git push origin :refs/tags/${{ steps.module_info.outputs.module_version }}
+        else
+          echo "Tag does not exist. Proceeding to create a new one."
+        fi
 
     - name: Create Release
       id: create_release
