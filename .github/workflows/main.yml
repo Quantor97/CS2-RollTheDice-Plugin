@@ -18,7 +18,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '7.0.x' # Aktualisiert auf .NET 7
+        dotnet-version: '7.0.x' # Adjust the version as per your project requirement
 
     - name: Extract Module Info from CS file
       id: module_info
@@ -45,14 +45,34 @@ jobs:
     - name: Publish
       run: dotnet publish --configuration Release --output ./publish
 
-    - name: Create DLL with version and path
+    - name: Archive DLL
       run: |
-        mkdir -p "./addons/counterstrikesharp/plugins/${{ steps.module_info.outputs.module_name }}"
-        cp "./publish/${{ steps.module_info.outputs.module_name }}.dll" "./addons/counterstrikesharp/plugins/${{ steps.module_info.outputs.module_name }}/${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.dll"
-      
-    - name: Upload DLL
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.dll
-        path: ./addons/counterstrikesharp/plugins/${{ steps.module_info.outputs.module_name }}/${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.dll
+        ZIP_NAME="${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.zip"
+        DLL_PATH="./publish/${{ steps.module_info.outputs.module_name }}.dll"
+        mkdir -p "release"
+        zip -j "release/$ZIP_NAME" "$DLL_PATH"
 
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.module_info.outputs.module_version }}
+        release_name: Release ${{ steps.module_info.outputs.module_version }}
+        draft: false
+        prerelease: false
+        body: |
+          Release of ${{ steps.module_info.outputs.module_name }} version ${{ steps.module_info.outputs.module_version }}.
+        assets: |
+          ./release/${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.zip
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.zip
+        asset_name: ${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.zip
+        asset_content_type: application/zip
