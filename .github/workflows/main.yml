@@ -34,13 +34,13 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --no-restore -c Release -o ./build
+      run: dotnet build --configuration Release --output ./build
 
     - name: Test
-      run: dotnet test --no-build -c Release --verbosity normal
+      run: dotnet test --no-build --configuration Release --verbosity normal
 
     - name: Publish
-      run: dotnet publish --no-build -c Release -o ./publish
+      run: dotnet publish --configuration Release --output ./publish
 
     - name: Create DLL with version and path
       run: |
