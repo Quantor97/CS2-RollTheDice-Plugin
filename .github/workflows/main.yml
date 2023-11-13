@@ -23,8 +23,8 @@ jobs:
     - name: Extract project info
       id: project_info
       run: |
-        CLASS_NAME=$(grep -oP '(?<=<ClassName Condition=" \'$(ClassName)\' == \'\' ">).*(?=</ClassName>)' RollTheDice.csproj)
-        MODULE_VERSION=$(grep -oP '(?<=<ModuleVersion>).*(?=</ModuleVersion>)' RollTheDice.csproj)
+        CLASS_NAME=$(grep -P -i '    <ClassName Condition=" '"'"'\$\(ClassName\)'"'"' == '"'"''"'"' ">[A-Za-z]+</ClassName>' RollTheDice.csproj)
+        MODULE_VERSION=$(grep -P -i '    <ModuleVersion>[A-Za-z]+</ModuleVersion>' RollTheDice.csproj)
         echo "Project DLL Name: $CLASS_NAME"
         echo "Module Version: $MODULE_VERSION"
         echo "::set-output name=project_dll_name::$CLASS_NAME"
