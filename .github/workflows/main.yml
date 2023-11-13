@@ -45,12 +45,15 @@ jobs:
     - name: Publish
       run: dotnet publish --configuration Release --output ./publish
 
-    - name: Archive DLL
+    - name: Archive DLL with folder structure
       run: |
-        ZIP_NAME="${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.zip"
-        DLL_PATH="./publish/${{ steps.module_info.outputs.module_name }}.dll"
-        mkdir -p "release"
-        zip -j "release/$ZIP_NAME" "$DLL_PATH"
+        DLL_NAME="${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.dll"
+        DLL_PATH="./publish/${DLL_NAME}"
+        ZIP_PATH="./release/${DLL_NAME}.zip"
+        DEST_PATH="addons/counterstrikesharp/plugins/${{ steps.module_info.outputs.module_name }}/"
+        mkdir -p "release/$DEST_PATH"
+        cp "$DLL_PATH" "release/$DEST_PATH"
+        (cd release && zip -r "$ZIP_PATH" "./$DEST_PATH")
 
     - name: Create Release
       id: create_release
