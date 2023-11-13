@@ -44,29 +44,32 @@ jobs:
 
     - name: Publish
       run: dotnet publish --configuration Release --output ./publish
-
-    - name: Check and Archive DLL
+    
+    - name: Archive DLL with folder structure
       run: |
         MODULE_NAME="${{ steps.module_info.outputs.module_name }}"
         MODULE_VERSION="${{ steps.module_info.outputs.module_version }}"
-        DLL_PATH="./publish/${MODULE_NAME}.dll" # Update this path if necessary
-        ZIP_PATH="./release/${MODULE_NAME}-${MODULE_VERSION}.zip"
+        DLL_NAME="${MODULE_NAME}.dll"
+        PUBLISH_DIR="./publish"
+        ZIP_DIR="./release"
         DEST_DIR="addons/counterstrikesharp/plugins/${MODULE_NAME}/"
-        
-        # Ensure the DLL exists
-        if [ ! -f "$DLL_PATH" ]; then
-            echo "DLL not found: $DLL_PATH"
+        ZIP_FILE="${MODULE_NAME}-${MODULE_VERSION}.zip"
+    
+        # Ensure the DLL exists in the publish directory
+        if [ ! -f "$PUBLISH_DIR/$DLL_NAME" ]; then
+            echo "DLL not found: $PUBLISH_DIR/$DLL_NAME"
             exit 1
         fi
     
         # Create the directory structure for the ZIP
-        mkdir -p "$(dirname "$ZIP_PATH")/$DEST_DIR"
-        
-        # Copy the DLL to the new directory structure
-        cp "$DLL_PATH" "$(dirname "$ZIP_PATH")/$DEST_DIR"
+        mkdir -p "$ZIP_DIR/$DEST_DIR"
     
-        # Archive the directory structure with the DLL
-        (cd "$(dirname "$ZIP_PATH")" && zip -r "$(basename "$ZIP_PATH")" "$(basename "$DEST_DIR")")
+        # Copy the DLL to the destination directory
+        cp "$PUBLISH_DIR/$DLL_NAME" "$ZIP_DIR/$DEST_DIR"
+    
+        # Create the ZIP file
+        (cd "$ZIP_DIR" && zip -r "$ZIP_FILE" ".")
+
 
 
 
