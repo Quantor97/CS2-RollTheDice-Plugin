@@ -23,7 +23,7 @@ jobs:
     - name: Extract Module Info from CS file
       id: module_info
       run: |
-        CS_FILE=$(find . -name '*.cs' -print -quit)
+        CS_FILE=$(find $GITHUB_WORKSPACE -name '*.cs' -print -quit)
         MODULE_NAME_RAW=$(grep -oP '(?<=public override string ModuleName => ").*(?=";)' "$CS_FILE")
         MODULE_NAME="${MODULE_NAME_RAW// /}" # Remove all spaces from the module name
         MODULE_VERSION=$(grep -oP '(?<=public override string ModuleVersion => ").*(?=";)' "$CS_FILE")
