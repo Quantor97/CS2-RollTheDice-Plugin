@@ -1,0 +1,106 @@
+name: .NET CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [created]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '7.0.x' # Adjust the version as per your project requirement
+
+    - name: Extract Module Info from CS file
+      id: module_info
+      run: |
+        CS_FILE=$(find . -name '*.cs' -print -quit)
+        MODULE_NAME_RAW=$(grep -oP '(?<=public override string ModuleName => ").*(?=";)' "$CS_FILE")
+        MODULE_NAME="${MODULE_NAME_RAW// /}" # Remove all spaces from the module name
+        MODULE_VERSION=$(grep -oP '(?<=public override string ModuleVersion => ").*(?=";)' "$CS_FILE")
+        MODULE_VERSION="${MODULE_VERSION// /}" # Remove all spaces from the module version
+        echo "Module Name: $MODULE_NAME"
+        echo "Module Version: $MODULE_VERSION"
+        echo "::set-output name=module_name::$MODULE_NAME"
+        echo "::set-output name=module_version::$MODULE_VERSION"
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --output ./build
+
+    - name: Test
+      run: dotnet test --no-build --configuration Release --verbosity normal
+
+    - name: Publish
+      run: dotnet publish --configuration Release --output ./publish
+    
+    - name: Archive DLL with folder structure
+      run: |
+        MODULE_NAME="${{ steps.module_info.outputs.module_name }}"
+        MODULE_VERSION="${{ steps.module_info.outputs.module_version }}"
+        DLL_NAME="${MODULE_NAME}.dll"
+        PUBLISH_DIR="./publish"
+        ZIP_DIR="./release"
+        DEST_DIR="addons/counterstrikesharp/plugins/${MODULE_NAME}/"
+        ZIP_FILE="${MODULE_NAME}-${MODULE_VERSION}.zip"
+    
+        # Ensure the DLL exists in the publish directory
+        if [ ! -f "$PUBLISH_DIR/$DLL_NAME" ]; then
+            echo "DLL not found: $PUBLISH_DIR/$DLL_NAME"
+            exit 1
+        fi
+    
+        # Create the directory structure for the ZIP
+        mkdir -p "$ZIP_DIR/$DEST_DIR"
+    
+        # Copy the DLL to the destination directory
+        cp "$PUBLISH_DIR/$DLL_NAME" "$ZIP_DIR/$DEST_DIR"
+    
+        # Create the ZIP file
+        (cd "$ZIP_DIR" && zip -r "$ZIP_FILE" ".")
+
+    - name: Check if tag already exists
+      id: check_tag
+      run: |
+        if git rev-parse ${{ steps.module_info.outputs.module_version }} >/dev/null 2>&1
+        then
+          echo "Tag ${{ steps.module_info.outputs.module_version }} exists! Deleting..."
+          git tag -d ${{ steps.module_info.outputs.module_version }}
+          git push origin :refs/tags/${{ steps.module_info.outputs.module_version }}
+        else
+          echo "Tag does not exist. Proceeding to create a new one."
+        fi
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.module_info.outputs.module_version }}
+        release_name: Release ${{ steps.module_info.outputs.module_version }}
+        draft: false
+        prerelease: false
+        body: |
+          Release of ${{ steps.module_info.outputs.module_name }} version ${{ steps.module_info.outputs.module_version }}.
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.zip
+        asset_name: ${{ steps.module_info.outputs.module_name }}-${{ steps.module_info.outputs.module_version }}.zip
+        asset_content_type: application/zip

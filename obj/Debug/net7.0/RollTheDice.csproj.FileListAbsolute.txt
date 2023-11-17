@@ -1,0 +1,12 @@
+C:\Users\enes9\Desktop\CounterStrike 2 Projects\CS2-Plugins\RollTheDiceV2\obj\Debug\net7.0\RollTheDice.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\enes9\Desktop\CounterStrike 2 Projects\CS2-Plugins\RollTheDiceV2\obj\Debug\net7.0\RollTheDice.AssemblyInfoInputs.cache
+C:\Users\enes9\Desktop\CounterStrike 2 Projects\CS2-Plugins\RollTheDiceV2\obj\Debug\net7.0\RollTheDice.AssemblyInfo.cs
+C:\Users\enes9\Desktop\CounterStrike 2 Projects\CS2-Plugins\RollTheDiceV2\obj\Debug\net7.0\RollTheDice.csproj.CoreCompileInputs.cache
+C:\Users\enes9\Desktop\CounterStrike 2 Projects\CS2-Plugins\RollTheDiceV2\obj\Debug\net7.0\RollTheDice.csproj.AssemblyReference.cache
+C:\Users\enes9\Desktop\CounterStrike 2 Projects\CS2-Plugins\RollTheDiceV2\bin\Debug\net7.0\RollTheDice.deps.json
+C:\Users\enes9\Desktop\CounterStrike 2 Projects\CS2-Plugins\RollTheDiceV2\bin\Debug\net7.0\RollTheDice.dll
+C:\Users\enes9\Desktop\CounterStrike 2 Projects\CS2-Plugins\RollTheDiceV2\bin\Debug\net7.0\RollTheDice.pdb
+C:\Users\enes9\Desktop\CounterStrike 2 Projects\CS2-Plugins\RollTheDiceV2\obj\Debug\net7.0\RollTheDice.dll
+C:\Users\enes9\Desktop\CounterStrike 2 Projects\CS2-Plugins\RollTheDiceV2\obj\Debug\net7.0\refint\RollTheDice.dll
+C:\Users\enes9\Desktop\CounterStrike 2 Projects\CS2-Plugins\RollTheDiceV2\obj\Debug\net7.0\RollTheDice.pdb
+C:\Users\enes9\Desktop\CounterStrike 2 Projects\CS2-Plugins\RollTheDiceV2\obj\Debug\net7.0\ref\RollTheDice.dll

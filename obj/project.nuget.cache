@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "ig7BtF9MhYOvtgmhvsLNze8wihPzq8sr44H3xeT5bJTXl1ZPVaD2RY6eyv1QO3XBSSrJDzyhdOf6yUV/bmezCA==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\enes9\\Desktop\\CounterStrike 2 Projects\\CS2-Plugins\\RollTheDicev2\\RollTheDice.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\enes9\\.nuget\\packages\\counterstrikesharp.api\\1.0.50\\counterstrikesharp.api.1.0.50.nupkg.sha512",
+    "C:\\Users\\enes9\\.nuget\\packages\\mcmaster.netcore.plugins\\1.4.0\\mcmaster.netcore.plugins.1.4.0.nupkg.sha512",
+    "C:\\Users\\enes9\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
+    "C:\\Users\\enes9\\.nuget\\packages\\microsoft.dotnet.platformabstractions\\3.1.6\\microsoft.dotnet.platformabstractions.3.1.6.nupkg.sha512",
+    "C:\\Users\\enes9\\.nuget\\packages\\microsoft.extensions.dependencymodel\\5.0.0\\microsoft.extensions.dependencymodel.5.0.0.nupkg.sha512",
+    "C:\\Users\\enes9\\.nuget\\packages\\system.data.datasetextensions\\4.5.0\\system.data.datasetextensions.4.5.0.nupkg.sha512"
+  ],
+  "logs": []
+}
