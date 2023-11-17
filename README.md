@@ -30,49 +30,56 @@ Players can roll the dice for a chance to get:
 | Effect              | Description                                                                          | Functional    | Note |
 |---------------------|--------------------------------------------------------------------------------------|---------------|--------|
 | Nothing             | Nothing                                                                              | ✔️           |     |
-| Random Weapon       | Give the player a random weapon                                                      | ✔️           |     |
+| Get Random Weapon   | Give the player a random weapon                                                      | ✔️           |     |
+| Loose Random Weapon | Player looses a random weapon                                                        | ✔️           |     |
 | Low Gravity         | Scale the player's gravity                                                           | ✔️           |     |
 | High Gravity        | Scale the player's gravity                                                           | ✔️           |     |
 | More Health         | Add health to the player                                                             | ✔️           | Health status isn't visual updating  |
 | Less Health         | Remove health from the player                                                        | ✔️           | Health status isn't visual updating   |
-| Increased Speed     | Scale the player's speed                                                             | ❌           | |
+| Increased Speed     | Scale the player's speed                                                             | ❌           | WIP |
 | Decreased Speed     | Scale the player's speed                                                             | ✔️           | |
 | Vampire             | Absorb health from the player upon dealing damage and transfer it to the attacker.   | ✔️           | |
-| Mirrored Vampire    | The damage dealt to players is reflected back onto the attacking player.             | ✔️           | |
-| Invisible           | Make the player invisible for specific duration                                      | ❌           | |
+| Mirror Damage       | The damage dealt to players is reflected back onto the attacking player.             | ✔️           | |
+| Invisible           | Make the player invisible for specific duration                                      | ❌           | WIP |
+| GodMode             | Player gets godemode for a specific amount of time                                   | ❌           | WIP |
+| Noclip              | Player gets noclip for a specific amount of time                                     | ❌           | WIP |
+| Suicide             | Player gets slayed                                                                   | ❌           | WIP |
 
-(Current status for version 1.0.0)
+(Current status for version 2.0.0)
 
 ## 📝 Commands
 
-| Command                            | Description                                     | Usage                                    |
-| ---------------------------------- | ----------------------------------------------- | ---------------------------------------- |
-| `dice`                             | Roll the dice to trigger a random effect.       | `!dice`                             |
-| `rtd_reloadconfig`                 | Reload the configuration files                  | `!rtd_reloadconfig`                      |
+| Command                             | Description                                     | Usage                                    | Permissions       |
+| ----------------------------------- | ----------------------------------------------- | ---------------------------------------- |-------------------|
+| `dice`                              | Roll the dice to trigger a random effect.       | `!dice`                                  | None              |
+| `rtd_config_all`                    | Reload the configuration files                  | `!rtd_reloadconfig`                      | @css/root         |
+| `rtd_config_language <config_file>` | Change the language to a config file            | `!rtd_config_language de`                | @css/root         |
+| `rtd_config_effect <config_file>`   | Reload the configuration files                  | `!rtd_config_effect opconfig`            | @css/root         |
 
 ## ⚙️ Configuration
 
-After the initialization of the plugin, two files and a folder are created. Firstly, the Config.json file is generated, which holds the plugin settings. Secondly, the en.json file is created along with the 'translation' folder. The Config.json is intended for adjusting effects and general settings, while en.json is used for translation.
-In config.json, all effects provided by the plugin are listed in the "effects" section, and there is a "general" section providing general settings for the plugin.
+After the initialization of the plugin, several .json files (a total of 3) are created in the Config directory within the CounterStrikeSharp folder (Config directory: \addons\counterstrikesharp\configs\plugins\RollTheDice). Firstly, there is the **RollTheDice.json** file, which provides general settings for the plugin. Additionally, in the 'effects' folder, there is a **default.json** file where you can edit the values of the effects. Finally, there is the **en.json** file in the 'Translations' folder, where you can set your own language file. You can create your own effects and translation files by simply creating a new JSON file. For example, if you want to translate into Spanish, create a new JSON file in the Translations folder and adjust the translation values (it's best to copy everything from en.json and modify the values in your file). Same for effects.
 
-To switch the plugin's language, modify the 'language' attribute in the config.json and then either manually create or let the plugin generate a file in the 'translations' folder with the identical name specified in the 'config' file. Translate your content within that file. For guidance, you can refer to the default en.json. I suggest using ChatGPT for translation to prevent formatting issues
+To switch the plugin's language, modify the 'language' attribute in the RollTheDice.json and then either manually create or let the plugin generate a file in the 'translations' folder with the identical name specified in the 'config' file. Translate your content within that file. For guidance, you can refer to the default en.json. I suggest using ChatGPT for translation to prevent formatting issues
 
-A description for the **general** section in config.json:
-- **Language**: Determines the language for all translations.
-- **DiceRollsPerRound**: Specifies the number of dice rolls allowed per round for each player.
-- **BroadcastDiceRoll**: If true, everyone on the server can witness the outcome.
-- **BroadcastDiceRollTerroristOnly**: If true, only Terrorists can see the dice rolls of other players.
-- **BroadcastDiceRollCounterTerroristOnly**: If true, only Counter-Terrorists can see the dice rolls of other players.
-- **BroadcastPluginCommand**: If true, a plugin command info is broadcasted at the beginning of each round.
-- **UnicastDiceRoll**: If true, the LocalPlayer can see their own dice rolls.
-- **UnicastEffectDescription**: If true, the effect description is displayed for the LocalPlayer.
-- **UnicastRollAmount**: If true, the number of rolls available to the player is shown.
-- **TsCanRoll**: Determines whether Terrorists are allowed to roll the dice.
-- **CTsCanRoll**: Determines whether Counter-Terrorists are allowed to roll the dice.
-- **ResetRollsOnRoundStart**: If true, all rolls and effects are reset at the start of each round.
-- **ResetRollsOnDeath**: If true, rolls and effects are reset for a player upon death.
+A description for the **RollTheDice.json** config file:
+- **Language**: Determines the language for the plugin (A new JSON file will be generated if one with the specified name does not exist).
+- **Effect config file**: Determines the configuration for the effects (A new JSON file will be generated if one with the specified name does not exist)
+- **Rolls per Round**: Specifies the number of dice rolls allowed per round for each player.
+- **Remove last effect on roll**: Deletes the last effect as soon as a new effect is added (WIP).
+- **Ts can roll**: Determines whether Terrorists are allowed to roll the dice.
+- **CTs can roll**: Determines whether Counter-Terrorists are allowed to roll the dice.
+- **Print roll message for all teams**: If true, everyone on the server can witness the outcome.
+- **Print roll message for Ts**: If true, Terrorists can see the dice rolls of other players.
+- **Print roll message for CTs**: If true, Counter-Terrorists can see the dice rolls of other players.
+- **Print plugin command information**: If true, a plugin command info is broadcasted at the beginning of each round.
+- **Print roll message for LocalPlayer**: If true, the LocalPlayer can see their own dice rolls.
+- **Print effect description for LocalPlayer**: If true, the effect description is displayed for the LocalPlayer.
+- **Print roll amount for LocalPlayer**: If true, the number of rolls available to the player is shown.
+- **Reset effects and roll count for all players at round start**: If true, all rolls and effects are reset at the start of each round.
+- **Reset effects and roll for LocalPlayer at death**: If true, rolls and effects are reset for a player upon death.
 
-To manipulate the effects, the config.json displays three attributes for each effect: "Enabled," "Probability," and "Parameters."
+To manipulate the effects, the **default.json** in effects folder displays three attributes for each effect: "Enabled," "Probability," and "Parameters."
 
 - **Enabled**: This attribute, as the name suggests, toggles the effect on or off.
 - **Probability**: This is the entry factor for the effect. It's not a direct probability but a factor determining the occurrence of the effect. Please note that this is not a probability in the traditional sense; it's a factor that influences the likelihood of the effect happening. Don't be surprised; I designed it this way to avoid having to adjust probabilities every time you tweak a value.
@@ -117,7 +124,7 @@ I am open for business: [![Discord](https://img.shields.io/badge/Discord-preach9
 
 ## 📜 License
 
-This project is under the MIT License.
+This project is under the GNU V2 License.
 
 ---
 
