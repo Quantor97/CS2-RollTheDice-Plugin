@@ -53,8 +53,8 @@ Players can roll the dice for a chance to get:
 | ----------------------------------- | ----------------------------------------------- | ---------------------------------------- |-------------------|
 | `dice`                              | Roll the dice to trigger a random effect.       | `!dice`                                  | None              |
 | `rtd_config_all`                    | Reload the configuration files                  | `!rtd_reloadconfig`                      | @css/root         |
-| `rtd_config_language <config_file>` | Change the language to a config file            | `!rtd_config_language de`                | @css/root         |
-| `rtd_config_effect <config_file>`   | Reload the configuration files                  | `!rtd_config_effect opconfig`            | @css/root         |
+| `rtd_config_language <config_file>` | Change the language config                      | `!rtd_config_language de`                | @css/root         |
+| `rtd_config_effect <config_file>`   | Change the effect config                        | `!rtd_config_effect opconfig`            | @css/root         |
 
 ## ⚙️ Configuration
 
