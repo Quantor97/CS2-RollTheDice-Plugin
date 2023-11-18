@@ -1,5 +1,8 @@
+using System.Timers;
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Events;
+using Preach.CS2.Plugins.RollTheDiceV2.Utilities;
 
 namespace Preach.CS2.Plugins.RollTheDiceV2.Core.BaseEffect;
 public abstract class EffectBase : IEffect
@@ -55,6 +58,19 @@ public abstract class EffectBase : IEffect
             CumulativeProbability = TotalCumulativeProbability;
         }
 
+    }
+
+    public void StartTimer(ref Dictionary<IntPtr, CounterStrikeSharp.API.Modules.Timers.Timer> effectTimers, 
+        CCSPlayerController? playerController, params object[] args)
+    {
+        if(this is not IEffectTimer effectTimer)
+            return;
+
+        var timer = RollTheDice.Instance!.AddTimer((float)args[0], () => {
+            Server.ExecuteCommand($"rtd_timer_effects_end {playerController!.UserId} {Name}");
+        });
+
+        effectTimers.Add(playerController!.Handle, timer);
     }
 
     public string GetEffectPrefix()

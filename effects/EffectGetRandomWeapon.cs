@@ -4,7 +4,7 @@ using Preach.CS2.Plugins.RollTheDiceV2.Utilities;
 
 namespace Preach.CS2.Plugins.RollTheDiceV2.Effects;
 
-public class EffectGetRandomWeapon : EffectBaseRegular, IEffectParamterized
+public class EffectGetRandomWeapon : EffectBaseRegular, IEffectParameter
 {
     public override bool Enabled { get; set; } = true;
     public override string PrettyName { get; set; } = "Get Random Weapon".__("effect_name_get_random_weapon");

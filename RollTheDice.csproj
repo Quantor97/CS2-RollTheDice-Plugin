@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
-    <Copy SourceFiles="./bin/Debug/net7.0/$(ClassName).dll" DestinationFolder="$(DestinationFolder)/$(ClassName)/" />
+    <!-- <Copy SourceFiles="./bin/Debug/net7.0/$(ClassName).dll" DestinationFolder="$(DestinationFolder)/$(ClassName)/" /> -->
     <Copy SourceFiles="./bin/Debug/net7.0/$(ClassName).dll" DestinationFolder="$(DestinationFolderLocal)/$(ClassName)/" />
   </Target>
 </Project>

@@ -96,5 +96,16 @@ public class EffectManager
         return HookResult.Continue;
     }
 
+    public HookResult HandlePlayerHurt(EventPlayerHurt @event, GameEventInfo eventInfo)
+    {
+        var victim = @event.Userid;
+        var attacker = @event.Attacker;
+
+        attacker?.GetEventEffect<EventPlayerHurt>()?.OnEvent(@event, eventInfo);
+        victim?.GetEventEffect<EventPlayerHurt>()?.OnEvent(@event, eventInfo);
+
+        return HookResult.Continue;
+    }
+
     #endregion
 }

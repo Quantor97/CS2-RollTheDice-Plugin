@@ -4,7 +4,7 @@ using Preach.CS2.Plugins.RollTheDiceV2.Utilities;
 
 namespace Preach.CS2.Plugins.RollTheDiceV2.Effects;
 
-public class EffectLooseRandomWeapon : EffectBaseRegular, IEffectParamterized
+public class EffectLooseRandomWeapon : EffectBaseRegular, IEffectParameter
 {
     public override bool Enabled {get; set; } = true;
     public override string PrettyName {get; set; } = "Loose Random Weapon".__("effect_name_loose_random_weapon");
@@ -25,7 +25,7 @@ public class EffectLooseRandomWeapon : EffectBaseRegular, IEffectParamterized
             return;
 
         var randomWeapon = weaponServices.MyWeapons
-            .Where(x => x.Value.DesignerName != "weapon_knife")
+            .Where(x => x.Value.DesignerName != "weapon_knife" || !string.IsNullOrEmpty(x.Value.DesignerName))
             .OrderBy(x => Guid.NewGuid())
             .First();
 
@@ -37,13 +37,8 @@ public class EffectLooseRandomWeapon : EffectBaseRegular, IEffectParamterized
 
         var weaponName = randomWeapon.Value.DesignerName;
         randomWeapon.Value.Remove();
+
         PrintDescription(playerController, "effect_description_loose_random_weapon", weaponName);
-
-        // Todo: Select knife if activee Weapon is removed
-        var knife = weaponServices.MyWeapons.Where(x => x.Value.DesignerName == "weapon_knife").FirstOrDefault();
-
-        if(knife == null)
-            return;
     }
 
     public override void OnRemove(CCSPlayerController? playerController)

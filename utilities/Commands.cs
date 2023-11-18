@@ -1,6 +1,7 @@
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Core;
+using Preach.CS2.Plugins.RollTheDiceV2.Core.BaseEffect;
 
 namespace Preach.CS2.Plugins.RollTheDiceV2.Utilities;
 public class Commands 
@@ -73,6 +74,27 @@ public class Commands
         _plugin.AddCommand("rtd_config_language", "Change the translation config!".__("cmd_description_translation_config"), 
             [RequiresPermissions("@css/root")] (ply, info) => {
                 ConfigCallback(ply, "translation", 2, info);
+            });
+
+        _plugin.AddCommand("rtd_timer_effects_end", "A workround to kill all effect timers!".__("cmd_description_kill_effect_timers"), 
+            [RequiresPermissions("@css/root"), CommandHelper(0, "", CommandUsage.SERVER_ONLY)] (ply, info) => {
+                if(info.ArgCount != 3)
+                    return;
+
+                var playerID = info.ArgByIndex(1);
+                var effectName = info.ArgByIndex(2);
+
+                if(!int.TryParse(playerID, out var playerIDInt))
+                    return;
+                
+                var getEffect = EffectBase.Effects.Where(effect => effect.Name.Contains(effectName)).First();
+                var getPly = CounterStrikeSharp.API.Utilities.GetPlayerFromUserid(playerIDInt);
+
+                if(getEffect == null || getPly == null || getEffect is not IEffectTimer effectTimer)
+                    return;
+
+                effectTimer.OnTimerEnd(getPly);
+                effectTimer.Timers.Remove(getPly.Handle);
             });
     }
 }

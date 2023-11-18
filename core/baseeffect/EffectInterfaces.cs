@@ -1,6 +1,7 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Events;
+using CounterStrikeSharp.API.Modules.Timers;
 
 namespace Preach.CS2.Plugins.RollTheDiceV2.Core.BaseEffect;
 
@@ -25,14 +26,15 @@ public interface IEffectGameEventVerbose
     string MessageOnEvent { get; set; }
 }
 
-public interface IEffectParamterized
+public interface IEffectParameter
 {
     Dictionary<string, string> RawParameters {get; set;}
 }
 
 public interface IEffectTimer
 {
-    void OnTimer(CCSPlayerController playerController);
+    Dictionary<IntPtr, CounterStrikeSharp.API.Modules.Timers.Timer> Timers { get; set; }
+    void OnTimerEnd(CCSPlayerController playerController);
 }
 
 public interface IEffectWorkInProgress

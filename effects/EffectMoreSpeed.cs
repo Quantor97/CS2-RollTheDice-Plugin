@@ -5,7 +5,7 @@ using Preach.CS2.Plugins.RollTheDiceV2.Utilities;
 
 namespace Preach.CS2.Plugins.RollTheDiceV2.Effects;
 
-public class EffectMoreSpeed : EffectBaseRegular, IEffectParamterized, IEffectWorkInProgress
+public class EffectMoreSpeed : EffectBaseRegular, IEffectParameter
 {
     public override bool Enabled { get; set; } = true;
     public override string PrettyName { get; set; } = "More Speed".__("effect_name_more_speed");
@@ -27,8 +27,8 @@ public class EffectMoreSpeed : EffectBaseRegular, IEffectParamterized, IEffectWo
         if(!float.TryParse(speedStr, out var speedF))
             return;
 
-        playerController!.PlayerPawn.Value.MovementServices!.Maxspeed *= speedF;
-        PrintDescription(playerController, "effect_description_more_speed", (speedF * 100)+"%");
+        playerController!.PlayerPawn.Value.VelocityModifier *= speedF;
+        PrintDescription(playerController, "effect_description_more_speed", ((speedF-1) * 100)+"%");
     }
 
     public override void OnRemove(CCSPlayerController? playerController)

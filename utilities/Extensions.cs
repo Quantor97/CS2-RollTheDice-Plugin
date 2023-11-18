@@ -72,9 +72,28 @@ public static class Extensions
         plyController!.GiveNamedItem(weaponName);
     }
 
+    public static void RefreshUI(this CCSPlayerController plyController)
+    {
+        if(!plyController.IsValidPly() || plyController is { PlayerPawn.Value: {WeaponServices: null, ItemServices: null} })
+            return;
+
+        string healthshot = "weapon_healthshot";
+
+        plyController.GiveNamedItem(healthshot);
+        foreach(var weapon in plyController.PlayerPawn.Value.WeaponServices!.MyWeapons)
+        {
+            if(weapon == null || weapon.Value == null || weapon.Value.DesignerName == null)
+                continue;
+
+            if(weapon.Value.DesignerName.Contains(healthshot))
+                weapon.Value.Remove();
+        }
+
+    }
+
     public static bool IsAlive(this CCSPlayerController plyController)
     {
-        return plyController is {PlayerPawn.Value.LifeState: 0};
+        return plyController is { IsValid: true, PawnIsAlive: true };
     }
 
     public static string __(this string val, string translateKey, params string[] args)

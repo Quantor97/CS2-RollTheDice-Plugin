@@ -5,7 +5,7 @@ using Preach.CS2.Plugins.RollTheDiceV2.Utilities;
 
 namespace Preach.CS2.Plugins.RollTheDiceV2.Effects;
 
-public class EffectMirrorDamage : EffectBaseEvent<EventPlayerHurt>, IEffectParamterized
+public class EffectMirrorDamage : EffectBaseEvent<EventPlayerHurt>, IEffectParameter
 {
     private bool _allowTeamDamage = false;
     public override bool Enabled { get; set; } = true;

@@ -5,12 +5,12 @@ using Preach.CS2.Plugins.RollTheDiceV2.Utilities;
 
 namespace Preach.CS2.Plugins.RollTheDiceV2.Effects;
 
-public class EffectMoreHealth : EffectBaseRegular, IEffectParamterized
+public class EffectMoreHealth : EffectBaseRegular, IEffectParameter
 {
     public override bool Enabled { get; set; } = true;
     public override string PrettyName { get; set; } = "More Health".__("effect_name_more_health");
     public override string Description { get; set; } = "Your health is increased by {mark}{0}".__("effect_description_more_health");
-    public override double Probability { get; set; }  = 4;
+    public override double Probability { get; set; }  = 3;
     public Dictionary<string, string> RawParameters {get; set; } = new();
     public override bool ShowDescriptionOnRoll { get; set; } = false;
 
@@ -28,6 +28,8 @@ public class EffectMoreHealth : EffectBaseRegular, IEffectParamterized
             return;
 
         playerController!.PlayerPawn.Value.Health += healthInt;
+
+        playerController.RefreshUI();
         PrintDescription(playerController, "effect_description_more_health", healthStr);
     }
 

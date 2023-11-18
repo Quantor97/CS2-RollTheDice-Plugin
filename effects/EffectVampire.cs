@@ -5,7 +5,7 @@ using Preach.CS2.Plugins.RollTheDiceV2.Utilities;
 
 namespace Preach.CS2.Plugins.RollTheDiceV2.Effects;
 
-public class EffectVampire : EffectBaseEvent<EventPlayerHurt>, IEffectParamterized
+public class EffectVampire : EffectBaseEvent<EventPlayerHurt>, IEffectParameter
 {
     public override bool Enabled { get; set; } = true;
     public override string PrettyName { get; set; } = "Vampire".__("effect_name_vampire") ;

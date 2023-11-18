@@ -64,7 +64,7 @@ public class DiceSystem
     private bool CheckTeamAndLifeState(CCSPlayerController plyController)
     {
 
-        if(plyController.PlayerPawn.Value.LifeState != 0)
+        if(!plyController.PawnIsAlive)
         {
             plyController.LogChat("You can not roll the dice while dead!"
                     .__("dice_cant_roll_dead"), LogType.INFO);

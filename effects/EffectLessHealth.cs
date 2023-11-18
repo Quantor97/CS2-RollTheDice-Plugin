@@ -4,7 +4,7 @@ using Preach.CS2.Plugins.RollTheDiceV2.Utilities;
 
 namespace Preach.CS2.Plugins.RollTheDiceV2.Effects;
 
-public class EffectLessHealth : EffectBaseRegular, IEffectParamterized
+public class EffectLessHealth : EffectBaseRegular, IEffectParameter
 {
     public override bool Enabled { get; set; } = true;
     public override string PrettyName { get; set; } = "Less Health".__("effect_name_less_health");
@@ -29,6 +29,8 @@ public class EffectLessHealth : EffectBaseRegular, IEffectParamterized
         // Health can't be less than 1 otherwise server crashes
         var plyHealth = playerController!.PlayerPawn.Value.Health;
         playerController!.PlayerPawn.Value.Health = Math.Max(plyHealth - healthInt, 1);
+
+        playerController.RefreshUI();
         PrintDescription(playerController, "effect_description_less_health", healthStr);
     }
 

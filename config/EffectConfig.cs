@@ -98,7 +98,7 @@ public class EffectConfig
 				{ "Probability", effect.Probability },
 			};
 
-			if(effect is IEffectParamterized effectParameterized)
+			if(effect is IEffectParameter effectParameterized)
 			{
 				effectData.Add("Parameters", effectParameterized.RawParameters);
 			}
@@ -156,7 +156,7 @@ public class EffectConfig
 				if(probabilityProperty != null)
 					effect.Probability = ((JsonElement)probabilityProperty).GetDouble();
 
-				if(effect is IEffectParamterized effectParameterized)
+				if(effect is IEffectParameter effectParameterized)
 				{
 					var parameterProperty = Helpers.GetJsonElement(effect, "Parameters");
 					if(parameterProperty != null)

@@ -48,11 +48,7 @@ public class EventSystem
 
     public HookResult HandlePlayerHurt(EventPlayerHurt @event, GameEventInfo eventInfo)
     {
-        var victim = @event.Userid;
-        var attacker = @event.Attacker;
-
-        attacker?.GetEventEffect<EventPlayerHurt>()?.OnEvent(@event, eventInfo);
-        victim?.GetEventEffect<EventPlayerHurt>()?.OnEvent(@event, eventInfo);
+        _plugin.EffectManager!.HandlePlayerHurt(@event, eventInfo);
 
         return HookResult.Continue;
     }
