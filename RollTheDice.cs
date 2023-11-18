@@ -15,7 +15,7 @@ public class RollTheDice : BasePlugin, IPluginConfig<GeneralConfig>
     public static readonly bool UNFINISHED_EFFECTS = false;
     public override string ModuleName => "Roll The Dice";
     public override string ModuleDescription => "Roll The Dice or RTD is a plugin that allows players to roll the dice and get a random effect.";
-    public override string ModuleVersion => "2.0.0";
+    public override string ModuleVersion => "2.1.0";
     public override string ModuleAuthor => "Preach";
     required public GeneralConfig Config { get; set; }
     public static RollTheDice? Instance { get; private set; }
