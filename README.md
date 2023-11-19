@@ -29,21 +29,21 @@ Players can roll the dice for a chance to get:
 
 | Effect              | Description                                                                          | Functional    | Note |
 |---------------------|--------------------------------------------------------------------------------------|---------------|--------|
-| Nothing             | Nothing                                                                              | ✔️           |     |
-| Get Random Weapon   | Give the player a random weapon                                                      | ✔️           |     |
-| Loose Random Weapon | Player looses a random weapon                                                        | ✔️           |     |
-| Low Gravity         | Scale the player's gravity                                                           | ✔️           |     |
-| High Gravity        | Scale the player's gravity                                                           | ✔️           |     |
-| More Health         | Add health to the player                                                             | ✔️           | Health status isn't visual updating  |
-| Less Health         | Remove health from the player                                                        | ✔️           | Health status isn't visual updating   |
-| Increased Speed     | Scale the player's speed                                                             | ❌           | WIP |
+| Nothing             | Nothing                                                                              | ✔️           | |
+| Get Random Weapon   | Give the player a random weapon                                                      | ✔️           | |
+| Loose Random Weapon | Player looses a random weapon                                                        | ✔️           | |
+| Low Gravity         | Scale the player's gravity                                                           | ✔️           | |
+| High Gravity        | Scale the player's gravity                                                           | ✔️           | |
+| More Health         | Add health to the player                                                             | ✔️           | |
+| Less Health         | Remove health from the player                                                        | ✔️           | |
+| Increased Speed     | Scale the player's speed                                                             | ✔️           | |
 | Decreased Speed     | Scale the player's speed                                                             | ✔️           | |
-| Vampire             | Absorb health from the player upon dealing damage and transfer it to the attacker.   | ✔️           | |
-| Mirror Damage       | The damage dealt to players is reflected back onto the attacking player.             | ✔️           | |
-| Invisible           | Make the player invisible for specific duration                                      | ❌           | WIP |
-| GodMode             | Player gets godemode for a specific amount of time                                   | ❌           | WIP |
-| Noclip              | Player gets noclip for a specific amount of time                                     | ❌           | WIP |
-| Suicide             | Player gets slayed                                                                   | ❌           | WIP |
+| Vampire             | Absorb health from the player upon dealing damage and transfer it to the attacker.   | ✔️           | Health status isn't visual updating |
+| Mirror Damage       | The damage dealt to players is reflected back onto the attacking player.             | ✔️           | Health status isn't visual updating |
+| Invisible           | Make the player invisible for specific duration                                      | ✔️           | |
+| GodMode             | Player gets godemode for a specific amount of time                                   | ✔️           | |
+| Noclip              | Player gets noclip for a specific amount of time                                     | ✔️           | |
+| Suicide             | Player gets slayed                                                                   | ✔️           | |
 
 (Current status for version 2.0.0)
 
